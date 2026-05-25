@@ -10,9 +10,11 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap" rel="stylesheet">
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -25,20 +27,27 @@
       justify-content: center;
       padding: 32px 16px;
       color: #f4eee6;
+
       background:
         radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 35%),
         linear-gradient(135deg, #0b0b0f, #171119 45%, #050506);
+
       font-family: "Literata", serif;
     }
 
     .card {
       width: min(900px, 100%);
       padding: 42px 32px;
+
       border: 1px solid rgba(255,255,255,0.16);
       border-radius: 28px;
+
       background: rgba(10,10,12,0.68);
+
       box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+
       backdrop-filter: blur(14px);
+
       position: relative;
       overflow: hidden;
     }
@@ -50,37 +59,51 @@
 
     h1 {
       margin: 0 0 26px;
+
       font-family: "UnifrakturMaguntia", serif;
+
       font-size: clamp(48px, 10vw, 86px);
+
       font-weight: 400;
+
       text-align: center;
+
       color: #fff7ec;
     }
 
     .slider {
       width: 100%;
       overflow: hidden;
+
       margin-bottom: 32px;
+
       border-radius: 24px;
     }
 
     .slide-track {
       display: flex;
       gap: 18px;
+
       width: max-content;
+
       animation: scroll 50s linear infinite;
     }
 
     .slide-track img {
       width: 300px;
       height: 400px;
+
       object-fit: cover;
+
       border-radius: 22px;
+
       flex-shrink: 0;
+
       box-shadow: 0 12px 40px rgba(0,0,0,0.45);
     }
 
     @keyframes scroll {
+
       from {
         transform: translateX(0);
       }
@@ -88,58 +111,84 @@
       to {
         transform: translateX(-3180px);
       }
+
     }
 
     p {
       margin: 0 0 18px;
+
       font-size: clamp(17px, 2.5vw, 21px);
+
       line-height: 1.75;
     }
 
     .quote {
       margin-top: 30px;
+
       padding-top: 22px;
+
       border-top: 1px solid rgba(255,255,255,0.18);
+
       font-family: "UnifrakturMaguntia", serif;
+
       font-size: clamp(24px, 5vw, 38px);
+
       text-align: center;
+
       opacity: 0.9;
     }
 
     .small {
       margin-top: 18px;
+
       text-align: center;
+
       font-size: 14px;
+
       opacity: 0.56;
     }
 
     .music-btn {
       margin-top: 30px;
+
       width: 100%;
+
       padding: 14px;
+
       border: 1px solid rgba(255,255,255,0.2);
+
       border-radius: 14px;
+
       background: rgba(255,255,255,0.06);
+
       color: #f4eee6;
+
       font-size: 18px;
+
       font-family: "Literata", serif;
+
       cursor: pointer;
+
       transition: 0.3s;
     }
 
     .music-btn:hover {
       background: rgba(255,255,255,0.12);
     }
+
   </style>
 </head>
 
 <body>
+
   <main class="card">
+
     <section class="content">
 
       <h1>Для Жанульки</h1>
 
       <div class="slider">
+
         <div class="slide-track">
 
           <img src="photo1.jpg">
@@ -165,6 +214,7 @@
           <img src="photo10.jpg">
 
         </div>
+
       </div>
 
       <p>
@@ -194,21 +244,59 @@
         Я очень благодарен, что однажды услышал твои песни.
       </p>
 
-      <div class="quote">thank you for the music</div>
+      <div class="quote">
+        thank you for the music
+      </div>
 
       <div class="small">
         скрытое письмо, открытое через QR-код
       </div>
 
-      <button onclick="document.getElementById('song').play()" class="music-btn">
-        включить песню
+      <button onclick="playMusic()" class="music-btn">
+        включить музыку
       </button>
 
-      <audio id="song" loop>
-        <source src="zhanulka.mp3" type="audio/mpeg">
-      </audio>
+      <audio id="song"></audio>
+
+      <script>
+
+        const tracks = [
+          "track1.mp3",
+          "track2.mp3",
+          "track3.mp3"
+        ];
+
+        let currentTrack = 0;
+
+        const audio = document.getElementById("song");
+
+        function playMusic() {
+
+          audio.src = tracks[currentTrack];
+
+          audio.play();
+
+        }
+
+        audio.addEventListener("ended", () => {
+
+          currentTrack++;
+
+          if (currentTrack >= tracks.length) {
+            currentTrack = 0;
+          }
+
+          audio.src = tracks[currentTrack];
+
+          audio.play();
+
+        });
+
+      </script>
 
     </section>
+
   </main>
+
 </body>
 </html>
