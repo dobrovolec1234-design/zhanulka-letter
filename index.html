@@ -29,12 +29,380 @@
         linear-gradient(135deg, #0b0b0f, #171119 45%, #050506);
       font-family: "Literata", serif;
       overflow-x: hidden;
+      position: relative;
     }
 
-    .cat-left-top, .cat-right-top, .cat-left-bottom, .cat-right-bottom {
+    .autograph-background {
       position: fixed;
+      inset: 0;
+      background-image: url("Autograph.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: min(1200px, 95vw);
+      opacity: 0.14;
+      z-index: 0;
+      pointer-events: none;
+      filter: drop-shadow(0 0 22px rgba(255,255,255,0.12));
+    }
+
+    .cat-left-top {
+      position: fixed;
+      left: -45px;
+      top: 45px;
       width: 210px;
       height: 210px;
+      object-fit: cover;
+      border-radius: 28px;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    .cat-right-top {
+      position: fixed;
+      right: -45px;
+      top: 45px;
+      width: 210px;
+      height: 210px;
+      object-fit: cover;
+      border-radius: 28px;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    .cat-left-bottom {
+      position: fixed;
+      left: -45px;
+      bottom: 45px;
+      width: 210px;
+      height: 210px;
+      object-fit: cover;
+      border-radius: 28px;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    .cat-right-bottom {
+      position: fixed;
+      right: -45px;
+      bottom: 45px;
+      width: 210px;
+      height: 210px;
+      object-fit: cover;
+      border-radius: 28px;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    .card {
+      width: min(900px, 100%);
+      padding: 42px 32px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 28px;
+      background: rgba(10,10,12,0.76);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+      backdrop-filter: blur(14px);
+      position: relative;
+      overflow: hidden;
+      z-index: 5;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      margin: 0 0 26px;
+      font-family: "UnifrakturMaguntia", serif;
+      font-size: clamp(48px, 10vw, 86px);
+      font-weight: 400;
+      text-align: center;
+      color: #fff7ec;
+    }
+
+    .photo-area {
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    .slider {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 24px;
+    }
+
+    .slide-track {
+      display: flex;
+      gap: 18px;
+      width: max-content;
+      animation: scroll 50s linear infinite;
+    }
+
+    .slide-track img {
+      width: 300px;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 22px;
+      flex-shrink: 0;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+    }
+
+    @keyframes scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-3180px); }
+    }
+
+    p {
+      margin: 0 0 18px;
+      font-size: clamp(17px, 2.5vw, 21px);
+      line-height: 1.75;
+    }
+
+    .quote {
+      margin-top: 30px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(255,255,255,0.18);
+      font-family: "UnifrakturMaguntia", serif;
+      font-size: clamp(24px, 5vw, 38px);
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    .small, .stats {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.65;
+    }
+
+    .music-control {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-top: 30px;
+    }
+
+    .music-btn {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      color: #f4eee6;
+      font-size: 18px;
+      font-family: "Literata", serif;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .music-btn:hover {
+      background: rgba(255,255,255,0.12);
+    }
+
+    .volume-control {
+      width: 150px;
+      accent-color: white;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .heart {
+      position: absolute;
+      font-size: 24px;
+      pointer-events: none;
+      animation: floatUp 2s linear forwards;
+      z-index: 9999;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(-50%, -180px) scale(1.8) rotate(20deg);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .autograph-background {
+        background-size: 120vw;
+        opacity: 0.1;
+      }
+
+      .cat-left-top, .cat-right-top, .cat-left-bottom, .cat-right-bottom {
+        width: 115px;
+        height: 115px;
+        opacity: 0.65;
+      }
+
+      .cat-left-top { left: -55px; top: 25px; }
+      .cat-right-top { right: -55px; top: 25px; }
+      .cat-left-bottom { left: -55px; bottom: 25px; }
+      .cat-right-bottom { right: -55px; bottom: 25px; }
+
+      .music-control {
+        flex-direction: column;
+      }
+
+      .volume-control {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="autograph-background"></div>
+
+  <img src="cats.jpg" class="cat-left-top">
+  <img src="cats2.jpg" class="cat-right-top">
+  <img src="cats3.jpg" class="cat-left-bottom">
+  <img src="cats4.jpg" class="cat-right-bottom">
+
+  <main class="card">
+    <section class="content">
+
+      <h1>Для Жанульки</h1>
+
+      <div class="photo-area">
+        <div class="slider">
+          <div class="slide-track">
+            <img src="photo1.jpg">
+            <img src="photo2.jpg">
+            <img src="photo3.jpg">
+            <img src="photo4.jpg">
+            <img src="photo5.jpg">
+            <img src="photo6.jpg">
+            <img src="photo7.jpg">
+            <img src="photo8.jpg">
+            <img src="photo9.jpg">
+            <img src="photo10.jpg">
+
+            <img src="photo1.jpg">
+            <img src="photo2.jpg">
+            <img src="photo3.jpg">
+            <img src="photo4.jpg">
+            <img src="photo5.jpg">
+            <img src="photo6.jpg">
+            <img src="photo7.jpg">
+            <img src="photo8.jpg">
+            <img src="photo9.jpg">
+            <img src="photo10.jpg">
+          </div>
+        </div>
+      </div>
+
+      <p>
+        Мой путь прослушивания твоей музыки начался с сериала
+        «Трудные подростки». В 3 сезоне 1 серии я услышал песню
+        «Синдром Бога», и с того самого момента твоя музыка начала
+        звучать у меня буквально 24/7.
+      </p>
+
+      <p>
+        Твои песни были рядом в моменты, когда внутри было слишком
+        много мыслей и слишком мало нужных слов.
+      </p>
+
+      <p>
+        А потом я услышал твои треки в «Зайчике» и снова почувствовал
+        тот самый первый вайб знакомства с твоим творчеством.
+      </p>
+
+      <p>
+        Спасибо тебе за искренность, атмосферу и эмоции, которые ты
+        вкладываешь в свои песни. Ты даже не представляешь, сколько
+        тепла и смысла твоя музыка может дать человеку.
+      </p>
+
+      <p>
+        Я очень благодарен, что однажды услышал твои песни.
+      </p>
+
+      <div class="quote">
+        thank you for the music
+      </div>
+
+      <div class="small">
+        скрытое письмо, открытое через QR-код
+      </div>
+
+      <div class="stats">
+        ❤️ Сердечек нажато: <span id="heartCount">0</span>
+      </div>
+
+      <div class="music-control">
+        <button onclick="playMusic()" class="music-btn">
+          включить музыку
+        </button>
+
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="1"
+          id="volumeControl"
+          class="volume-control"
+        >
+      </div>
+
+      <audio id="song"></audio>
+
+      <script>
+        const tracks = [
+          "track1.mp3",
+          "track2.mp3",
+          "track3.mp3"
+        ];
+
+        let currentTrack = 0;
+        const audio = document.getElementById("song");
+
+        function playMusic() {
+          audio.src = tracks[currentTrack];
+          audio.play();
+        }
+
+        audio.addEventListener("ended", () => {
+          currentTrack++;
+
+          if (currentTrack >= tracks.length) {
+            currentTrack = 0;
+          }
+
+          audio.src = tracks[currentTrack];
+          audio.play();
+        });
+
+        const volumeControl = document.getElementById("volumeControl");
+
+        volumeControl.addEventListener("input", function() {
+          audio.volume = this.value;
+        });
+
+        let heartCount = 0;
+        const heartCountText = document.getElementById("heartCount");
+
+        const hearts = ["🖤", "❤️", "💜", "💔", "✨", "♡"];
+
+        document.addEventListener("click", function(e) {
+          heartCount++;
+          heartCountText.textContent = heartCount;
+
+          const heart = document.createElement("div");
+
+          heart      height: 210px;
       object-fit: cover;
       border-radius: 28px;
       z-index: 1;
