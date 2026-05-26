@@ -14,9 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap" rel="stylesheet">
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -33,10 +31,8 @@
       overflow-x: hidden;
     }
 
-    .cat-left-top {
+    .cat-left-top, .cat-right-top, .cat-left-bottom, .cat-right-bottom {
       position: fixed;
-      left: -45px;
-      top: 45px;
       width: 210px;
       height: 210px;
       object-fit: cover;
@@ -46,44 +42,10 @@
       opacity: 0.9;
     }
 
-    .cat-right-top {
-      position: fixed;
-      right: -45px;
-      top: 45px;
-      width: 210px;
-      height: 210px;
-      object-fit: cover;
-      border-radius: 28px;
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0.9;
-    }
-
-    .cat-left-bottom {
-      position: fixed;
-      left: -45px;
-      bottom: 45px;
-      width: 210px;
-      height: 210px;
-      object-fit: cover;
-      border-radius: 28px;
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0.9;
-    }
-
-    .cat-right-bottom {
-      position: fixed;
-      right: -45px;
-      bottom: 45px;
-      width: 210px;
-      height: 210px;
-      object-fit: cover;
-      border-radius: 28px;
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0.9;
-    }
+    .cat-left-top { left: -45px; top: 45px; }
+    .cat-right-top { right: -45px; top: 45px; }
+    .cat-left-bottom { left: -45px; bottom: 45px; }
+    .cat-right-bottom { right: -45px; bottom: 45px; }
 
     .card {
       width: min(900px, 100%);
@@ -112,10 +74,30 @@
       color: #fff7ec;
     }
 
+    .photo-area {
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    .autograph-bg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 85%;
+      max-width: 720px;
+      transform: translate(-50%, -50%);
+      opacity: 0.16;
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+      filter: drop-shadow(0 0 20px rgba(255,255,255,0.15));
+    }
+
     .slider {
+      position: relative;
+      z-index: 1;
       width: 100%;
       overflow: hidden;
-      margin-bottom: 32px;
       border-radius: 24px;
     }
 
@@ -136,13 +118,8 @@
     }
 
     @keyframes scroll {
-      from {
-        transform: translateX(0);
-      }
-
-      to {
-        transform: translateX(-3180px);
-      }
+      from { transform: translateX(0); }
+      to { transform: translateX(-3180px); }
     }
 
     p {
@@ -161,23 +138,11 @@
       opacity: 0.9;
     }
 
-    .small {
+    .small, .stats {
       margin-top: 18px;
       text-align: center;
       font-size: 14px;
-      opacity: 0.56;
-    }
-
-    .autograph{
-      width: 260px;
-      display: block;
-      margin: 35px auto 10px;
-      opacity: 0.18;
-      pointer-events: none;
-      user-select: none;
-
-      filter:
-        drop-shadow(0 0 14px rgba(255,255,255,0.08));
+      opacity: 0.65;
     }
 
     .music-control {
@@ -232,35 +197,16 @@
     }
 
     @media (max-width: 900px) {
-
-      .cat-left-top,
-      .cat-right-top,
-      .cat-left-bottom,
-      .cat-right-bottom {
+      .cat-left-top, .cat-right-top, .cat-left-bottom, .cat-right-bottom {
         width: 115px;
         height: 115px;
         opacity: 0.65;
       }
 
-      .cat-left-top {
-        left: -55px;
-        top: 25px;
-      }
-
-      .cat-right-top {
-        right: -55px;
-        top: 25px;
-      }
-
-      .cat-left-bottom {
-        left: -55px;
-        bottom: 25px;
-      }
-
-      .cat-right-bottom {
-        right: -55px;
-        bottom: 25px;
-      }
+      .cat-left-top { left: -55px; top: 25px; }
+      .cat-right-top { right: -55px; top: 25px; }
+      .cat-left-bottom { left: -55px; bottom: 25px; }
+      .cat-right-bottom { right: -55px; bottom: 25px; }
 
       .music-control {
         flex-direction: column;
@@ -270,9 +216,9 @@
         width: 100%;
       }
 
-      .autograph{
-        width: 180px;
-        opacity: 0.14;
+      .autograph-bg {
+        width: 100%;
+        opacity: 0.12;
       }
     }
   </style>
@@ -290,31 +236,33 @@
 
       <h1>Для Жанульки</h1>
 
-      <div class="slider">
-        <div class="slide-track">
+      <div class="photo-area">
+        <img src="Autograph.jpg" class="autograph-bg">
 
-          <img src="photo1.jpg">
-          <img src="photo2.jpg">
-          <img src="photo3.jpg">
-          <img src="photo4.jpg">
-          <img src="photo5.jpg">
-          <img src="photo6.jpg">
-          <img src="photo7.jpg">
-          <img src="photo8.jpg">
-          <img src="photo9.jpg">
-          <img src="photo10.jpg">
+        <div class="slider">
+          <div class="slide-track">
+            <img src="photo1.jpg">
+            <img src="photo2.jpg">
+            <img src="photo3.jpg">
+            <img src="photo4.jpg">
+            <img src="photo5.jpg">
+            <img src="photo6.jpg">
+            <img src="photo7.jpg">
+            <img src="photo8.jpg">
+            <img src="photo9.jpg">
+            <img src="photo10.jpg">
 
-          <img src="photo1.jpg">
-          <img src="photo2.jpg">
-          <img src="photo3.jpg">
-          <img src="photo4.jpg">
-          <img src="photo5.jpg">
-          <img src="photo6.jpg">
-          <img src="photo7.jpg">
-          <img src="photo8.jpg">
-          <img src="photo9.jpg">
-          <img src="photo10.jpg">
-
+            <img src="photo1.jpg">
+            <img src="photo2.jpg">
+            <img src="photo3.jpg">
+            <img src="photo4.jpg">
+            <img src="photo5.jpg">
+            <img src="photo6.jpg">
+            <img src="photo7.jpg">
+            <img src="photo8.jpg">
+            <img src="photo9.jpg">
+            <img src="photo10.jpg">
+          </div>
         </div>
       </div>
 
@@ -353,10 +301,11 @@
         скрытое письмо, открытое через QR-код
       </div>
 
-      <img src="Autograph.jpg" class="autograph">
+      <div class="stats">
+        ❤️ Сердечек нажато: <span id="heartCount">0</span>
+      </div>
 
       <div class="music-control">
-
         <button onclick="playMusic()" class="music-btn">
           включить музыку
         </button>
@@ -370,13 +319,11 @@
           id="volumeControl"
           class="volume-control"
         >
-
       </div>
 
       <audio id="song"></audio>
 
       <script>
-
         const tracks = [
           "track1.mp3",
           "track2.mp3",
@@ -384,19 +331,14 @@
         ];
 
         let currentTrack = 0;
-
         const audio = document.getElementById("song");
 
         function playMusic() {
-
           audio.src = tracks[currentTrack];
-
           audio.play();
-
         }
 
         audio.addEventListener("ended", () => {
-
           currentTrack++;
 
           if (currentTrack >= tracks.length) {
@@ -404,27 +346,27 @@
           }
 
           audio.src = tracks[currentTrack];
-
           audio.play();
-
         });
 
         const volumeControl = document.getElementById("volumeControl");
 
         volumeControl.addEventListener("input", function() {
-
           audio.volume = this.value;
-
         });
+
+        let heartCount = 0;
+        const heartCountText = document.getElementById("heartCount");
 
         const hearts = ["🖤", "❤️", "💜", "💔", "✨", "♡"];
 
         document.addEventListener("click", function(e) {
+          heartCount++;
+          heartCountText.textContent = heartCount;
 
           const heart = document.createElement("div");
 
           heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
-
           heart.className = "heart";
 
           heart.style.left = e.pageX + "px";
@@ -435,9 +377,7 @@
           setTimeout(() => {
             heart.remove();
           }, 2000);
-
         });
-
       </script>
 
     </section>
