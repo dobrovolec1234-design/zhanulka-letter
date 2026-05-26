@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap" rel="stylesheet">
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -33,6 +34,35 @@
 
       font-family: "Literata", serif;
       overflow-x: hidden;
+    }
+
+    .cat-corner {
+      position: fixed;
+      width: 240px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .cat-top-left {
+      top: -10px;
+      left: -10px;
+    }
+
+    .cat-top-right {
+      top: -10px;
+      right: -10px;
+      transform: scaleX(-1);
+    }
+
+    .cat-bottom-left {
+      bottom: 40px;
+      left: -10px;
+    }
+
+    .cat-bottom-right {
+      bottom: -10px;
+      right: -10px;
+      transform: scaleX(-1);
     }
 
     .card {
@@ -158,10 +188,16 @@
         opacity: 0;
       }
     }
+
   </style>
 </head>
 
 <body>
+
+  <img src="cat.png" class="cat-corner cat-top-left">
+  <img src="cat.png" class="cat-corner cat-top-right">
+  <img src="cat.png" class="cat-corner cat-bottom-left">
+  <img src="cat.png" class="cat-corner cat-bottom-right">
 
   <main class="card">
     <section class="content">
@@ -238,6 +274,7 @@
       <audio id="song"></audio>
 
       <script>
+
         const tracks = [
           "track1.mp3",
           "track2.mp3",
@@ -245,6 +282,7 @@
         ];
 
         let currentTrack = 0;
+
         const audio = document.getElementById("song");
 
         function playMusic() {
@@ -253,6 +291,7 @@
         }
 
         audio.addEventListener("ended", () => {
+
           currentTrack++;
 
           if (currentTrack >= tracks.length) {
@@ -261,14 +300,17 @@
 
           audio.src = tracks[currentTrack];
           audio.play();
+
         });
 
         const hearts = ["🖤", "❤️", "💜", "💔", "✨", "♡"];
 
         document.addEventListener("click", function(e) {
+
           const heart = document.createElement("div");
 
           heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+
           heart.className = "heart";
 
           heart.style.left = e.pageX + "px";
@@ -279,7 +321,9 @@
           setTimeout(() => {
             heart.remove();
           }, 2000);
+
         });
+
       </script>
 
     </section>
