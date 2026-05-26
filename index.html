@@ -168,8 +168,14 @@
       opacity: 0.56;
     }
 
-    .music-btn {
+    .music-control {
+      display: flex;
+      gap: 14px;
+      align-items: center;
       margin-top: 30px;
+    }
+
+    .music-btn {
       width: 100%;
       padding: 14px;
       border: 1px solid rgba(255,255,255,0.2);
@@ -184,6 +190,13 @@
 
     .music-btn:hover {
       background: rgba(255,255,255,0.12);
+    }
+
+    .volume-control {
+      width: 150px;
+      accent-color: white;
+      cursor: pointer;
+      flex-shrink: 0;
     }
 
     .heart {
@@ -234,6 +247,14 @@
       .cat-right-bottom {
         right: -55px;
         bottom: 25px;
+      }
+
+      .music-control {
+        flex-direction: column;
+      }
+
+      .volume-control {
+        width: 100%;
       }
     }
   </style>
@@ -314,9 +335,21 @@
         скрытое письмо, открытое через QR-код
       </div>
 
-      <button onclick="playMusic()" class="music-btn">
-        включить музыку
-      </button>
+      <div class="music-control">
+        <button onclick="playMusic()" class="music-btn">
+          включить музыку
+        </button>
+
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="1"
+          id="volumeControl"
+          class="volume-control"
+        >
+      </div>
 
       <audio id="song"></audio>
 
@@ -344,6 +377,12 @@
 
           audio.src = tracks[currentTrack];
           audio.play();
+        });
+
+        const volumeControl = document.getElementById("volumeControl");
+
+        volumeControl.addEventListener("input", function() {
+          audio.volume = this.value;
         });
 
         const hearts = ["🖤", "❤️", "💜", "💔", "✨", "♡"];
