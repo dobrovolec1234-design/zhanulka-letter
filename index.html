@@ -14,7 +14,6 @@
   <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap" rel="stylesheet">
 
   <style>
-
     * {
       box-sizing: border-box;
     }
@@ -33,30 +32,7 @@
         linear-gradient(135deg, #0b0b0f, #171119 45%, #050506);
 
       font-family: "Literata", serif;
-
       overflow-x: hidden;
-    }
-
-    .cats-overlay{
-      position: fixed;
-
-      top: 0;
-      left: 0;
-
-      width: 100vw;
-      height: 100vh;
-
-      object-fit: cover;
-
-      pointer-events: none;
-
-      z-index: 0;
-
-      opacity: 0.95;
-
-      padding: 40px;
-
-      box-sizing: border-box;
     }
 
     .card {
@@ -67,14 +43,11 @@
       border-radius: 28px;
 
       background: rgba(10,10,12,0.68);
-
       box-shadow: 0 24px 80px rgba(0,0,0,0.45);
-
       backdrop-filter: blur(14px);
 
       position: relative;
       overflow: hidden;
-
       z-index: 5;
     }
 
@@ -85,51 +58,37 @@
 
     h1 {
       margin: 0 0 26px;
-
       font-family: "UnifrakturMaguntia", serif;
-
       font-size: clamp(48px, 10vw, 86px);
-
       font-weight: 400;
-
       text-align: center;
-
       color: #fff7ec;
     }
 
     .slider {
       width: 100%;
       overflow: hidden;
-
       margin-bottom: 32px;
-
       border-radius: 24px;
     }
 
     .slide-track {
       display: flex;
       gap: 18px;
-
       width: max-content;
-
       animation: scroll 50s linear infinite;
     }
 
     .slide-track img {
       width: 300px;
       height: 400px;
-
       object-fit: cover;
-
       border-radius: 22px;
-
       flex-shrink: 0;
-
       box-shadow: 0 12px 40px rgba(0,0,0,0.45);
     }
 
     @keyframes scroll {
-
       from {
         transform: translateX(0);
       }
@@ -137,64 +96,42 @@
       to {
         transform: translateX(-3180px);
       }
-
     }
 
     p {
       margin: 0 0 18px;
-
       font-size: clamp(17px, 2.5vw, 21px);
-
       line-height: 1.75;
     }
 
     .quote {
       margin-top: 30px;
-
       padding-top: 22px;
-
       border-top: 1px solid rgba(255,255,255,0.18);
-
       font-family: "UnifrakturMaguntia", serif;
-
       font-size: clamp(24px, 5vw, 38px);
-
       text-align: center;
-
       opacity: 0.9;
     }
 
     .small {
       margin-top: 18px;
-
       text-align: center;
-
       font-size: 14px;
-
       opacity: 0.56;
     }
 
     .music-btn {
       margin-top: 30px;
-
       width: 100%;
-
       padding: 14px;
-
       border: 1px solid rgba(255,255,255,0.2);
-
       border-radius: 14px;
-
       background: rgba(255,255,255,0.06);
-
       color: #f4eee6;
-
       font-size: 18px;
-
       font-family: "Literata", serif;
-
       cursor: pointer;
-
       transition: 0.3s;
     }
 
@@ -211,7 +148,6 @@
     }
 
     @keyframes floatUp {
-
       0% {
         transform: translate(-50%, -50%) scale(1);
         opacity: 1;
@@ -221,24 +157,18 @@
         transform: translate(-50%, -180px) scale(1.8) rotate(20deg);
         opacity: 0;
       }
-
     }
-
   </style>
 </head>
 
 <body>
 
-  <img src="cats.png" class="cats-overlay">
-
   <main class="card">
-
     <section class="content">
 
       <h1>Для Жанульки</h1>
 
       <div class="slider">
-
         <div class="slide-track">
 
           <img src="photo1.jpg">
@@ -264,7 +194,6 @@
           <img src="photo10.jpg">
 
         </div>
-
       </div>
 
       <p>
@@ -309,7 +238,6 @@
       <audio id="song"></audio>
 
       <script>
-
         const tracks = [
           "track1.mp3",
           "track2.mp3",
@@ -317,19 +245,14 @@
         ];
 
         let currentTrack = 0;
-
         const audio = document.getElementById("song");
 
         function playMusic() {
-
           audio.src = tracks[currentTrack];
-
           audio.play();
-
         }
 
         audio.addEventListener("ended", () => {
-
           currentTrack++;
 
           if (currentTrack >= tracks.length) {
@@ -337,19 +260,15 @@
           }
 
           audio.src = tracks[currentTrack];
-
           audio.play();
-
         });
 
         const hearts = ["🖤", "❤️", "💜", "💔", "✨", "♡"];
 
         document.addEventListener("click", function(e) {
-
           const heart = document.createElement("div");
 
           heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
-
           heart.className = "heart";
 
           heart.style.left = e.pageX + "px";
@@ -360,13 +279,10 @@
           setTimeout(() => {
             heart.remove();
           }, 2000);
-
         });
-
       </script>
 
     </section>
-
   </main>
 
 </body>
