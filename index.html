@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Для Жанульки</title>
 
   <link rel="icon" type="image/png" href="favicon.png">
@@ -63,9 +64,7 @@
       opacity: 0.45;
     }
 
-    @keyframes rainFall {
-      to { transform: translateY(120vh); }
-    }
+    @keyframes rainFall { to { transform: translateY(120vh); } }
 
     .cat-left-top,
     .cat-right-top,
@@ -130,9 +129,7 @@
       font-family: "Literata", serif;
     }
 
-    .tab-btn.active {
-      background: rgba(255,255,255,0.16);
-    }
+    .tab-btn.active { background: rgba(255,255,255,0.16); }
 
     .tab { display: none; }
     .tab.active { display: block; }
@@ -225,7 +222,8 @@
     button { font-family: "Literata", serif; }
 
     .save-btn,
-    .send-btn {
+    .send-btn,
+    .auth-btn {
       width: 100%;
       padding: 14px;
       border: 1px solid rgba(255,255,255,0.2);
@@ -238,8 +236,24 @@
     }
 
     .save-btn:hover,
-    .send-btn:hover {
+    .send-btn:hover,
+    .auth-btn:hover {
       background: rgba(255,255,255,0.12);
+    }
+
+    .auth-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .auth-status {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.75;
+      word-break: break-word;
     }
 
     .music-player {
@@ -286,9 +300,7 @@
       cursor: pointer;
     }
 
-    .progress-control {
-      margin-top: 16px;
-    }
+    .progress-control { margin-top: 16px; }
 
     .time-row {
       display: flex;
@@ -367,7 +379,8 @@
       .cat-right-bottom { right: -55px; bottom: 25px; }
 
       .stats-grid,
-      .tabs {
+      .tabs,
+      .auth-grid {
         grid-template-columns: 1fr;
       }
 
@@ -392,6 +405,28 @@
     <section class="content">
 
       <h1>Для Жанульки</h1>
+
+      <div class="panel">
+        <div class="small">Вход нужен, чтобы сердечки, музыка и пожелания сохранялись за твоим аккаунтом.</div>
+
+        <button class="auth-btn" id="googleLoginBtn" style="margin-top:12px;">
+          🔑 Войти через Google
+        </button>
+
+        <input id="emailInput" type="email" placeholder="Email">
+        <input id="passwordInput" type="password" placeholder="Пароль">
+
+        <div class="auth-grid">
+          <button class="auth-btn" id="emailLoginBtn">Войти по почте</button>
+          <button class="auth-btn" id="emailRegisterBtn">Регистрация</button>
+        </div>
+
+        <button class="auth-btn" id="logoutBtn" style="margin-top:12px;">
+          🚪 Выйти
+        </button>
+
+        <div class="auth-status" id="authStatus">Статус: не вошёл</div>
+      </div>
 
       <div class="tabs">
         <button class="tab-btn active" data-tab="letter">📜 Письмо</button>
@@ -452,7 +487,7 @@
             сохранить ник
           </button>
           <div class="small">
-            Ник можно менять. Сердечки и музыка не сбросятся, потому что они привязаны к твоему ID.
+            Ник можно менять. Сердечки и музыка не сбросятся, потому что они привязаны к твоему аккаунту.
           </div>
         </div>
 
@@ -489,7 +524,7 @@
         <div class="stats-grid">
           <div class="stat-box">🖤 Твои сердечки: <span id="myHearts">0</span></div>
           <div class="stat-box">🎧 Твои запуски: <span id="myMusic">0</span></div>
-          <div class="stat-box">🆔 ID: <span id="myId">...</span></div>
+          <div class="stat-box">🆔 ID: <span id="myId">не вошёл</span></div>
         </div>
       </div>
 
@@ -502,15 +537,7 @@
           <button id="nextTrackBtn">⏭</button>
         </div>
 
-        <input
-          type="range"
-          min="0"
-          max="100"
-          step="1"
-          value="0"
-          id="progressControl"
-          class="progress-control"
-        >
+        <input type="range" min="0" max="100" step="1" value="0" id="progressControl" class="progress-control">
 
         <div class="time-row">
           <span id="currentTime">0:00</span>
@@ -519,21 +546,14 @@
 
         <div class="volume-label">громкость</div>
 
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value="1"
-          id="volumeControl"
-          class="volume-control"
-        >
+        <input type="range" min="0" max="1" step="0.01" value="1" id="volumeControl" class="volume-control">
       </div>
 
       <audio id="song"></audio>
 
       <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+
         import {
           getDatabase,
           ref,
@@ -544,6 +564,16 @@
           serverTimestamp,
           update
         } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+        import {
+          getAuth,
+          GoogleAuthProvider,
+          signInWithPopup,
+          signInWithEmailAndPassword,
+          createUserWithEmailAndPassword,
+          onAuthStateChanged,
+          signOut
+        } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAnBQnt8bK-3G0zjNyIQsLY5s-_rjIV2Mk",
@@ -557,6 +587,112 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        let userId = null;
+        let userRef = null;
+
+        const authStatus = document.getElementById("authStatus");
+        const nicknameInput = document.getElementById("nicknameInput");
+
+        document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+          try {
+            await signInWithPopup(auth, googleProvider);
+          } catch (error) {
+            alert("Ошибка Google-входа: " + error.message);
+          }
+        });
+
+        document.getElementById("emailLoginBtn").addEventListener("click", async () => {
+          const email = document.getElementById("emailInput").value.trim();
+          const password = document.getElementById("passwordInput").value;
+
+          if (!email || !password) {
+            alert("Введи email и пароль");
+            return;
+          }
+
+          try {
+            await signInWithEmailAndPassword(auth, email, password);
+          } catch (error) {
+            alert("Ошибка входа: " + error.message);
+          }
+        });
+
+        document.getElementById("emailRegisterBtn").addEventListener("click", async () => {
+          const email = document.getElementById("emailInput").value.trim();
+          const password = document.getElementById("passwordInput").value;
+
+          if (!email || password.length < 6) {
+            alert("Пароль должен быть минимум 6 символов");
+            return;
+          }
+
+          try {
+            await createUserWithEmailAndPassword(auth, email, password);
+          } catch (error) {
+            alert("Ошибка регистрации: " + error.message);
+          }
+        });
+
+        document.getElementById("logoutBtn").addEventListener("click", async () => {
+          await signOut(auth);
+        });
+
+        function requireLogin() {
+          if (!userId || !userRef) {
+            alert("Сначала войди через Google или по почте");
+            return false;
+          }
+
+          return true;
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+          if (!user) {
+            userId = null;
+            userRef = null;
+            authStatus.textContent = "Статус: не вошёл";
+            document.getElementById("myId").textContent = "не вошёл";
+            document.getElementById("myHearts").textContent = "0";
+            document.getElementById("myMusic").textContent = "0";
+            return;
+          }
+
+          userId = user.uid;
+          userRef = ref(db, "users/" + userId);
+
+          authStatus.textContent = "Статус: вошёл как " + (user.email || user.uid);
+          document.getElementById("myId").textContent = user.email || user.uid;
+
+          const savedNickname = localStorage.getItem("zhanulkaNickname") || "";
+          const defaultNick = user.displayName || (user.email ? user.email.split("@")[0] : "Гость");
+
+          if (!nicknameInput.value) {
+            nicknameInput.value = savedNickname || defaultNick;
+          }
+
+          await update(userRef, {
+            email: user.email || "",
+            displayName: user.displayName || "",
+            photoURL: user.photoURL || "",
+            nickname: nicknameInput.value.trim().slice(0, 24) || defaultNick,
+            lastVisit: serverTimestamp()
+          });
+
+          onValue(userRef, snapshot => {
+            const dbUser = snapshot.val() || {};
+
+            document.getElementById("myHearts").textContent = dbUser.hearts || 0;
+            document.getElementById("myMusic").textContent = dbUser.musicPlays || 0;
+
+            if (dbUser.nickname && !nicknameInput.value) {
+              nicknameInput.value = dbUser.nickname;
+              localStorage.setItem("zhanulkaNickname", dbUser.nickname);
+            }
+          });
+        });
 
         const rain = document.getElementById("rain");
 
@@ -575,36 +711,10 @@
           btn.addEventListener("click", () => {
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
             document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-
             btn.classList.add("active");
             document.getElementById(btn.dataset.tab).classList.add("active");
           });
         });
-
-        let userId = localStorage.getItem("zhanulkaUserId");
-
-        if (!userId) {
-          userId = "user_" + Math.random().toString(36).slice(2, 10);
-          localStorage.setItem("zhanulkaUserId", userId);
-        }
-
-        document.getElementById("myId").textContent = userId.replace("user_", "");
-
-        const userRef = ref(db, "users/" + userId);
-
-        const savedNickname = localStorage.getItem("zhanulkaNickname") || "";
-        const nicknameInput = document.getElementById("nicknameInput");
-        nicknameInput.value = savedNickname;
-
-        update(userRef, {
-          lastVisit: serverTimestamp()
-        });
-
-        if (savedNickname) {
-          update(userRef, {
-            nickname: savedNickname
-          });
-        }
 
         const visitedKey = "zhanulkaVisited";
 
@@ -628,19 +738,9 @@
           document.getElementById("musicCount").textContent = snapshot.val() || 0;
         });
 
-        onValue(userRef, snapshot => {
-          const user = snapshot.val() || {};
-
-          document.getElementById("myHearts").textContent = user.hearts || 0;
-          document.getElementById("myMusic").textContent = user.musicPlays || 0;
-
-          if (user.nickname && !nicknameInput.value) {
-            nicknameInput.value = user.nickname;
-            localStorage.setItem("zhanulkaNickname", user.nickname);
-          }
-        });
-
         document.getElementById("saveNicknameBtn").addEventListener("click", async () => {
+          if (!requireLogin()) return;
+
           const nickname = nicknameInput.value.trim().slice(0, 24);
 
           if (!nickname) {
@@ -659,9 +759,10 @@
         });
 
         document.getElementById("sendMessageBtn").addEventListener("click", async () => {
+          if (!requireLogin()) return;
+
           const text = document.getElementById("messageInput").value.trim();
           const nickname = nicknameInput.value.trim() || "Гость";
-
           const lastMessageTime = Number(localStorage.getItem("lastMessageTime") || 0);
           const now = Date.now();
 
@@ -687,14 +788,12 @@
 
           localStorage.setItem("lastMessageTime", String(now));
           document.getElementById("messageInput").value = "";
-
           alert("Отправлено на модерацию");
         });
 
         onValue(ref(db, "messages"), snapshot => {
           const box = document.getElementById("approvedMessages");
           box.innerHTML = "";
-
           const messages = snapshot.val();
 
           if (!messages) {
@@ -714,21 +813,16 @@
           approved.forEach(msg => {
             const item = document.createElement("div");
             item.className = "message-item";
-
             item.innerHTML = `
               <div class="message-name">💜 ${escapeHTML(msg.nickname || "Гость")}</div>
               <div class="message-text">${escapeHTML(msg.text || "")}</div>
             `;
-
             box.appendChild(item);
           });
         });
 
         onValue(ref(db, "users"), snapshot => {
           const users = snapshot.val();
-
-          console.log("USERS DATA:", users);
-
           const topHeartsBox = document.getElementById("topHearts");
           const topMusicBox = document.getElementById("topMusic");
 
@@ -746,19 +840,14 @@
           const box = document.getElementById(elementId);
           box.innerHTML = "";
 
-          if (!users) {
-            box.innerHTML = "<div class='small'>Пока нет данных</div>";
-            return;
-          }
-
           const sorted = Object.entries(users)
             .map(([id, user]) => ({
-              nickname: user.nickname || ("Гость_" + id.slice(-4)),
+              nickname: user.nickname || user.displayName || ("Гость_" + id.slice(-4)),
               value: Number(user[field] || 0)
             }))
             .filter(user => user.value > 0)
             .sort((a, b) => b.value - a.value)
-            .slice(0, 10);
+            .slice(0, 25);
 
           if (sorted.length === 0) {
             box.innerHTML = "<div class='small'>Пока нет данных</div>";
@@ -768,12 +857,10 @@
           sorted.forEach((user, index) => {
             const item = document.createElement("div");
             item.className = "top-item";
-
             item.innerHTML = `
               <span>#${index + 1} ${escapeHTML(user.nickname)}</span>
               <span>${icon} ${user.value}</span>
             `;
-
             box.appendChild(item);
           });
         }
@@ -781,11 +868,13 @@
         const tracks = [
           "track1.mp3",
           "track2.mp3",
-          "track3.mp3"
+          "track3.mp3",
+          "track4.mp3",
+          "track5.mp3",
+          "track.mp3"
         ];
 
         let currentTrack = 0;
-
         const audio = document.getElementById("song");
         const playPauseBtn = document.getElementById("playPauseBtn");
         const prevTrackBtn = document.getElementById("prevTrackBtn");
@@ -804,9 +893,12 @@
           trackTitle.textContent = tracks[currentTrack];
           progressControl.value = 0;
           currentTimeText.textContent = "0:00";
+          durationTimeText.textContent = "0:00";
         }
 
         function countMusicPlay() {
+          if (!userId) return;
+
           const now = Date.now();
 
           if (now - lastMusicCount > 30000) {
@@ -837,33 +929,24 @@
         }
 
         playPauseBtn.addEventListener("click", () => {
-          if (isPlaying) {
-            pauseMusic();
-          } else {
-            playMusic();
-          }
+          if (isPlaying) pauseMusic();
+          else playMusic();
         });
 
         prevTrackBtn.addEventListener("click", () => {
           currentTrack--;
 
-          if (currentTrack < 0) {
-            currentTrack = tracks.length - 1;
-          }
+          if (currentTrack < 0) currentTrack = tracks.length - 1;
 
           loadTrack();
 
-          if (isPlaying) {
-            audio.play();
-          }
+          if (isPlaying) audio.play();
         });
 
         nextTrackBtn.addEventListener("click", () => {
           currentTrack++;
 
-          if (currentTrack >= tracks.length) {
-            currentTrack = 0;
-          }
+          if (currentTrack >= tracks.length) currentTrack = 0;
 
           loadTrack();
 
@@ -886,36 +969,22 @@
 
         progressControl.addEventListener("input", () => {
           if (!audio.duration) return;
-
           audio.currentTime = (progressControl.value / 100) * audio.duration;
         });
 
         audio.addEventListener("ended", () => {
           currentTrack++;
 
-          if (currentTrack >= tracks.length) {
-            currentTrack = 0;
-          }
+          if (currentTrack >= tracks.length) currentTrack = 0;
 
           loadTrack();
 
-          if (isPlaying) {
-            audio.play();
-          }
+          if (isPlaying) audio.play();
         });
 
         volumeControl.addEventListener("input", function() {
           audio.volume = this.value;
         });
-
-        function formatTime(seconds) {
-          if (!seconds || isNaN(seconds)) return "0:00";
-
-          const minutes = Math.floor(seconds / 60);
-          const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
-
-          return `${minutes}:${secs}`;
-        }
 
         loadTrack();
 
@@ -924,24 +993,21 @@
 
         document.addEventListener("click", function(e) {
           const heart = document.createElement("div");
-
           heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
           heart.className = "heart";
-
           heart.style.left = e.pageX + "px";
           heart.style.top = e.pageY + "px";
-
           document.body.appendChild(heart);
 
           setTimeout(() => {
             heart.remove();
           }, 2000);
 
+          if (!userId) return;
+
           const now = Date.now();
 
-          if (now - lastHeartClick < 2000) {
-            return;
-          }
+          if (now - lastHeartClick < 2000) return;
 
           lastHeartClick = now;
 
@@ -953,6 +1019,13 @@
             return (current || 0) + 1;
           });
         });
+
+        function formatTime(seconds) {
+          if (!seconds || isNaN(seconds)) return "0:00";
+          const minutes = Math.floor(seconds / 60);
+          const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+          return `${minutes}:${secs}`;
+        }
 
         function escapeHTML(text) {
           return String(text)
