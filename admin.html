@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Админка — Жанулька</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px 16px;
+      color: #f4eee6;
+      background:
+        radial-gradient(circle at top, rgba(120,70,160,0.18), transparent 35%),
+        linear-gradient(135deg, #07070a, #140b18 45%, #030304);
+      font-family: Georgia, serif;
+    }
+
+    .box {
+      width: min(900px, 100%);
+      margin: 0 auto;
+      padding: 32px;
+      border-radius: 26px;
+      background: rgba(8,8,12,0.45);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow:
+        0 0 40px rgba(180,120,255,0.08),
+        0 24px 80px rgba(0,0,0,0.45);
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    .small {
+      text-align: center;
+      opacity: 0.65;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.07);
+      color: #f4eee6;
+      font-size: 16px;
+      font-family: Georgia, serif;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    button:hover {
+      background: rgba(255,255,255,0.14);
+    }
+
+    .danger:hover {
+      background: rgba(255,80,80,0.22);
+    }
+
+    .approve:hover {
+      background: rgba(80,255,120,0.18);
+    }
+
+    .message {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.055);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .nickname {
+      font-weight: 700;
+      color: #f1c9ff;
+      margin-bottom: 8px;
+    }
+
+    .text {
+      line-height: 1.6;
+      opacity: 0.9;
+      white-space: pre-wrap;
+    }
+
+    .meta {
+      margin-top: 10px;
+      opacity: 0.5;
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    #adminPanel {
+      display: none;
+    }
+
+    #blocked {
+      display: none;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .email {
+      opacity: 0.75;
+      font-size: 14px;
+    }
+
+    .logout {
+      max-width: 160px;
+      margin-top: 0;
+    }
+
+    @media (max-width: 700px) {
+      .buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .box {
+        padding: 22px;
+      }
+
+      .logout {
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box" id="login">
+    <h2>🔒 Вход в админку</h2>
+
+    <button id="loginBtn">
+      Войти через Google
+    </button>
+
+    <div class="small">
+      Доступ разрешён только администратору.
+    </div>
+  </div>
+
+  <div class="box" id="blocked">
+    <h2>⛔ Доступ запрещён</h2>
+
+    <div class="small">
+      Этот Google-аккаунт не является администратором.
+    </div>
+
+    <button id="logoutBtnBlocked">
+      Выйти
+    </button>
+  </div>
+
+  <div class="box" id="adminPanel">
+    <div class="topbar">
+      <div>
+        <h1>Модерация сообщений</h1>
+        <div class="email" id="adminEmail"></div>
+      </div>
+
+      <button class="logout" id="logoutBtn">
+        Выйти
+      </button>
+    </div>
+
+    <div class="small">
+      Здесь отображаются сообщения со статусом <b>pending</b>.
+    </div>
+
+    <div id="messages"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      update,
+      remove
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+    const ADMIN_EMAIL = "dobrovolec1234@gmail.com";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAnBQnt8bK-3G0zjNyIQsLY5s--rjIV2Mk",
+      authDomain: "a-letter-for-zhanulka.firebaseapp.com",
+      databaseURL: "https://a-letter-for-zhanulka-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "a-letter-for-zhanulka",
+      storageBucket: "a-letter-for-zhanulka.firebasestorage.app",
+      messagingSenderId: "479179895784",
+      appId: "1:479179895784:web:7f3bcd70ed9070c0816a5d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    const login = document.getElementById("login");
+    const blocked = document.getElementById("blocked");
+    const adminPanel = document.getElementById("adminPanel");
+    const messagesBox = document.getElementById("messages");
+    const adminEmail = document.getElementById("adminEmail");
+
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        alert("Ошибка входа: " + error.message);
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await signOut(auth);
+      location.reload();
+    });
+
+    document.getElementById("logoutBtnBlocked").addEventListener("click", async () => {
+      await signOut(auth);
+      location.reload();
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        login.style.display = "block";
+        blocked.style.display = "none";
+        adminPanel.style.display = "none";
+        return;
+      }
+
+      if (user.email !== ADMIN_EMAIL) {
+        login.style.display = "none";
+        blocked.style.display = "block";
+        adminPanel.style.display = "none";
+        return;
+      }
+
+      login.style.display = "none";
+      blocked.style.display = "none";
+      adminPanel.style.display = "block";
+
+      adminEmail.textContent = "Вы вошли как: " + user.email;
+
+      loadMessages();
+    });
+
+    function loadMessages() {
+      onValue(ref(db, "messages"), (snapshot) => {
+        messagesBox.innerHTML = "";
+
+        const messages = snapshot.val();
+
+        if (!messages) {
+          messagesBox.innerHTML = "<div class='small'>Пока сообщений нет.</div>";
+          return;
+        }
+
+        const pendingMessages = Object.entries(messages)
+          .filter(([id, msg]) => msg.status === "pending")
+          .sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
+
+        if (pendingMessages.length === 0) {
+          messagesBox.innerHTML = "<div class='small'>Нет сообщений на модерации.</div>";
+          return;
+        }
+
+        pendingMessages.forEach(([id, msg]) => {
+          const div = document.createElement("div");
+          div.className = "message";
+
+          div.innerHTML = `
+            <div class="nickname">👤 ${escapeHTML(msg.nickname || "Гость")}</div>
+            <div class="text">${escapeHTML(msg.text || "")}</div>
+
+            <div class="meta">
+              ID сообщения: ${escapeHTML(id)}<br>
+              ID пользователя: ${escapeHTML(msg.userId || "unknown")}
+            </div>
+
+            <div class="buttons">
+              <button class="approve" onclick="approveMessage('${id}')">
+                ✅ Одобрить
+              </button>
+
+              <button class="danger" onclick="deleteMessage('${id}')">
+                ❌ Удалить
+              </button>
+            </div>
+          `;
+
+          messagesBox.appendChild(div);
+        });
+      });
+    }
+
+    window.approveMessage = async function(id) {
+      await update(ref(db, "messages/" + id), {
+        status: "approved",
+        approvedAt: Date.now()
+      });
+    };
+
+    window.deleteMessage = async function(id) {
+      if (confirm("Удалить это сообщение?")) {
+        await remove(ref(db, "messages/" + id));
+      }
+    };
+
+    function escapeHTML(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+
+</body>
+</html>
