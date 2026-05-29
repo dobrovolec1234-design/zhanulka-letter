@@ -956,7 +956,11 @@
         let lastMusicCount = Number(localStorage.getItem("lastMusicCount") || 0);
 
         function loadTrack() {
+          audio.pause();
+
           audio.src = tracks[currentTrack];
+          audio.load();
+
           trackTitle.textContent = tracks[currentTrack];
           progressControl.value = 0;
           currentTimeText.textContent = "0:00";
@@ -983,10 +987,14 @@
         }
 
         function playMusic() {
-          audio.play();
-          isPlaying = true;
-          playPauseBtn.textContent = "⏸ выключить";
-          countMusicPlay();
+          audio.play().then(() => {
+            isPlaying = true;
+            playPauseBtn.textContent = "⏸ выключить";
+            countMusicPlay();
+          }).catch(error => {
+            console.log("Ошибка запуска трека:", error);
+            alert("Не получилось запустить трек: " + tracks[currentTrack]);
+          });
         }
 
         function pauseMusic() {
@@ -1007,7 +1015,11 @@
 
           loadTrack();
 
-          if (isPlaying) audio.play();
+          if (isPlaying) {
+            audio.play().catch(error => {
+              console.log("Ошибка запуска трека:", error);
+            });
+          }
         });
 
         nextTrackBtn.addEventListener("click", () => {
@@ -1018,7 +1030,9 @@
           loadTrack();
 
           if (isPlaying) {
-            audio.play();
+            audio.play().catch(error => {
+              console.log("Ошибка запуска трека:", error);
+            });
             countMusicPlay();
           }
         });
@@ -1046,11 +1060,19 @@
 
           loadTrack();
 
-          if (isPlaying) audio.play();
+          if (isPlaying) {
+            audio.play().catch(error => {
+              console.log("Ошибка запуска трека:", error);
+            });
+          }
         });
 
         volumeControl.addEventListener("input", function() {
           audio.volume = this.value;
+        });
+
+        audio.addEventListener("error", () => {
+          console.log("Ошибка загрузки аудио:", tracks[currentTrack], audio.error);
         });
 
         loadTrack();
