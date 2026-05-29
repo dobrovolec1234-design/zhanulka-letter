@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Админка — Жанулька</title>
+
+  <title>Полная админка — Жанулька</title>
 
   <style>
     * { box-sizing: border-box; }
@@ -20,7 +21,7 @@
     }
 
     .box {
-      width: min(980px, 100%);
+      width: min(1100px, 100%);
       margin: 0 auto;
       padding: 32px;
       border-radius: 26px;
@@ -33,7 +34,10 @@
         0 24px 80px rgba(0,0,0,0.45);
     }
 
-    h1, h2 { text-align: center; margin-top: 0; }
+    h1, h2, h3 {
+      text-align: center;
+      margin-top: 0;
+    }
 
     .small {
       text-align: center;
@@ -42,7 +46,7 @@
       margin-top: 10px;
     }
 
-    input {
+    input, textarea {
       width: 100%;
       margin-top: 10px;
       padding: 13px 14px;
@@ -52,6 +56,13 @@
       color: #f4eee6;
       font-size: 15px;
       outline: none;
+      font-family: Georgia, serif;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.5;
     }
 
     button {
@@ -71,10 +82,10 @@
     button:hover { background: rgba(255,255,255,0.14); }
     .danger:hover { background: rgba(255,80,80,0.22); }
     .approve:hover { background: rgba(80,255,120,0.18); }
+    .warn:hover { background: rgba(255,190,80,0.18); }
 
     .auth-grid,
-    .buttons,
-    .tabs {
+    .buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
@@ -82,11 +93,24 @@
     }
 
     .tabs {
-      grid-template-columns: repeat(4, 1fr);
-      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin: 20px 0;
     }
 
-    .tab-btn.active { background: rgba(255,255,255,0.18); }
+    .tab-btn.active {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.35);
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
 
     .item {
       margin-top: 18px;
@@ -100,23 +124,28 @@
       font-weight: 700;
       color: #f1c9ff;
       margin-bottom: 8px;
+      word-break: break-word;
     }
 
     .text {
       line-height: 1.6;
       opacity: 0.9;
       white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .meta {
       margin-top: 10px;
-      opacity: 0.5;
+      opacity: 0.55;
       font-size: 13px;
       word-break: break-all;
+      line-height: 1.5;
     }
 
     #adminPanel,
-    #blocked { display: none; }
+    #blocked {
+      display: none;
+    }
 
     .topbar {
       display: flex;
@@ -137,12 +166,66 @@
       margin-top: 0;
     }
 
-    @media (max-width: 700px) {
-      .buttons,
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .stat-box {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      text-align: center;
+    }
+
+    .stat-number {
+      display: block;
+      font-size: 28px;
+      margin-top: 8px;
+      color: #f1c9ff;
+    }
+
+    .search-row {
+      margin: 12px 0;
+    }
+
+    .top-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .user-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .tabs,
+      .stats-grid,
       .auth-grid,
-      .tabs { grid-template-columns: 1fr; }
-      .box { padding: 22px; }
-      .logout { max-width: none; }
+      .buttons,
+      .user-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .box {
+        padding: 22px;
+      }
+
+      .logout {
+        max-width: none;
+      }
     }
   </style>
 </head>
@@ -176,7 +259,7 @@
   <div class="box" id="adminPanel">
     <div class="topbar">
       <div>
-        <h1>Админка</h1>
+        <h1>Полная админка</h1>
         <div class="email" id="adminEmail"></div>
       </div>
 
@@ -184,13 +267,68 @@
     </div>
 
     <div class="tabs">
-      <button class="tab-btn active" id="messagesPendingBtn">⏳ Пожелания</button>
-      <button class="tab-btn" id="messagesApprovedBtn">✅ Одобренные</button>
-      <button class="tab-btn" id="storiesPendingBtn">📖 Истории</button>
-      <button class="tab-btn" id="storiesApprovedBtn">📚 Опубликованные</button>
+      <button class="tab-btn active" data-panel="dashboardPanel">📊 Обзор</button>
+      <button class="tab-btn" data-panel="pendingMessagesPanel">⏳ Пожелания</button>
+      <button class="tab-btn" data-panel="approvedMessagesPanel">✅ Одобренные</button>
+      <button class="tab-btn" data-panel="pendingStoriesPanel">📖 Истории</button>
+      <button class="tab-btn" data-panel="approvedStoriesPanel">📚 Опубликованные</button>
+      <button class="tab-btn" data-panel="usersPanel">👥 Пользователи</button>
+      <button class="tab-btn" data-panel="topPanel">🏆 Топ</button>
     </div>
 
-    <div id="items"></div>
+    <section class="panel active" id="dashboardPanel">
+      <h2>📊 Статистика сайта</h2>
+
+      <div class="stats-grid">
+        <div class="stat-box">❤️ Сердечки <span class="stat-number" id="statHearts">0</span></div>
+        <div class="stat-box">👀 Просмотры <span class="stat-number" id="statViews">0</span></div>
+        <div class="stat-box">🎵 Музыка <span class="stat-number" id="statMusic">0</span></div>
+        <div class="stat-box">👥 Пользователи <span class="stat-number" id="statUsers">0</span></div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">⏳ Пожелания <span class="stat-number" id="statPendingMessages">0</span></div>
+        <div class="stat-box">✅ Одобренные <span class="stat-number" id="statApprovedMessages">0</span></div>
+        <div class="stat-box">📖 Истории <span class="stat-number" id="statPendingStories">0</span></div>
+        <div class="stat-box">📚 Опубликованные <span class="stat-number" id="statApprovedStories">0</span></div>
+      </div>
+    </section>
+
+    <section class="panel" id="pendingMessagesPanel">
+      <h2>⏳ Пожелания на модерации</h2>
+      <div id="pendingMessages"></div>
+    </section>
+
+    <section class="panel" id="approvedMessagesPanel">
+      <h2>✅ Одобренные пожелания</h2>
+      <div id="approvedMessages"></div>
+    </section>
+
+    <section class="panel" id="pendingStoriesPanel">
+      <h2>📖 Истории на модерации</h2>
+      <div id="pendingStories"></div>
+    </section>
+
+    <section class="panel" id="approvedStoriesPanel">
+      <h2>📚 Опубликованные истории</h2>
+      <div id="approvedStories"></div>
+    </section>
+
+    <section class="panel" id="usersPanel">
+      <h2>👥 Пользователи</h2>
+      <input id="userSearchInput" placeholder="Поиск по нику, email или UID">
+      <div id="usersList"></div>
+    </section>
+
+    <section class="panel" id="topPanel">
+      <h2>🏆 Топы</h2>
+
+      <h3>❤️ Топ по сердечкам</h3>
+      <div id="topHearts"></div>
+
+      <h3 style="margin-top:28px;">🎵 Топ по музыке</h3>
+      <div id="topMusic"></div>
+    </section>
   </div>
 
   <script type="module">
@@ -211,7 +349,8 @@
       ref,
       onValue,
       update,
-      remove
+      remove,
+      set
     } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
     const ADMIN_EMAIL = "dobrovolec1234@gmail.com";
@@ -231,14 +370,15 @@
     const db = getDatabase(app);
     const provider = new GoogleAuthProvider();
 
-    let mode = "messages";
-    let statusFilter = "pending";
-
     const login = document.getElementById("login");
     const blocked = document.getElementById("blocked");
     const adminPanel = document.getElementById("adminPanel");
-    const itemsBox = document.getElementById("items");
     const adminEmail = document.getElementById("adminEmail");
+
+    let allUsers = {};
+    let allMessages = {};
+    let allStories = {};
+    let allStats = {};
 
     document.getElementById("googleLoginBtn").addEventListener("click", async () => {
       try {
@@ -290,20 +430,15 @@
       location.reload();
     });
 
-    document.getElementById("messagesPendingBtn").addEventListener("click", () => setMode("messages", "pending", "messagesPendingBtn"));
-    document.getElementById("messagesApprovedBtn").addEventListener("click", () => setMode("messages", "approved", "messagesApprovedBtn"));
-    document.getElementById("storiesPendingBtn").addEventListener("click", () => setMode("stories", "pending", "storiesPendingBtn"));
-    document.getElementById("storiesApprovedBtn").addEventListener("click", () => setMode("stories", "approved", "storiesApprovedBtn"));
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
 
-    function setMode(newMode, newStatus, buttonId) {
-      mode = newMode;
-      statusFilter = newStatus;
-
-      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-      document.getElementById(buttonId).classList.add("active");
-
-      loadItems();
-    }
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.panel).classList.add("active");
+      });
+    });
 
     onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -326,77 +461,268 @@
 
       adminEmail.textContent = "Вы вошли как: " + user.email;
 
-      loadItems();
+      startListeners();
     });
 
-    function loadItems() {
-      onValue(ref(db, mode), (snapshot) => {
-        itemsBox.innerHTML = "";
+    function startListeners() {
+      onValue(ref(db, "stats"), snapshot => {
+        allStats = snapshot.val() || {};
+        renderDashboard();
+      });
 
-        const data = snapshot.val();
+      onValue(ref(db, "users"), snapshot => {
+        allUsers = snapshot.val() || {};
+        renderDashboard();
+        renderUsers();
+        renderTop();
+      });
 
-        if (!data) {
-          itemsBox.innerHTML = "<div class='small'>Пока ничего нет.</div>";
-          return;
-        }
+      onValue(ref(db, "messages"), snapshot => {
+        allMessages = snapshot.val() || {};
+        renderDashboard();
+        renderMessages();
+      });
 
-        const filtered = Object.entries(data)
-          .filter(([id, item]) => item.status === statusFilter)
-          .sort((a, b) => (b[1].createdAt || b[1].approvedAt || 0) - (a[1].createdAt || a[1].approvedAt || 0));
-
-        if (filtered.length === 0) {
-          itemsBox.innerHTML = "<div class='small'>В этом разделе пусто.</div>";
-          return;
-        }
-
-        filtered.forEach(([id, item]) => {
-          const div = document.createElement("div");
-          div.className = "item";
-
-          const isStory = mode === "stories";
-          const title = isStory
-            ? "📖 " + (item.title || "Без названия")
-            : "👤 " + (item.nickname || "Гость");
-
-          const text = isStory ? (item.text || "") : (item.text || "");
-
-          div.innerHTML = `
-            <div class="title">${escapeHTML(title)}</div>
-            ${isStory ? `<div class="meta">Автор: ${escapeHTML(item.nickname || "Гость")}</div>` : ""}
-            <div class="text">${escapeHTML(text)}</div>
-
-            <div class="meta">
-              Статус: ${escapeHTML(item.status || "unknown")}<br>
-              ID: ${escapeHTML(id)}<br>
-              ID пользователя: ${escapeHTML(item.userId || "unknown")}
-            </div>
-
-            <div class="buttons">
-              ${item.status !== "approved" ? `
-                <button class="approve" onclick="approveItem('${id}')">✅ Одобрить</button>
-              ` : ""}
-
-              <button class="danger" onclick="deleteItem('${id}')">❌ Удалить</button>
-            </div>
-          `;
-
-          itemsBox.appendChild(div);
-        });
+      onValue(ref(db, "stories"), snapshot => {
+        allStories = snapshot.val() || {};
+        renderDashboard();
+        renderStories();
       });
     }
 
-    window.approveItem = async function(id) {
-      await update(ref(db, mode + "/" + id), {
+    function renderDashboard() {
+      document.getElementById("statHearts").textContent = allStats.hearts || 0;
+      document.getElementById("statViews").textContent = allStats.views || 0;
+      document.getElementById("statMusic").textContent = allStats.music || 0;
+      document.getElementById("statUsers").textContent = Object.keys(allUsers || {}).length;
+
+      const messages = Object.values(allMessages || {});
+      const stories = Object.values(allStories || {});
+
+      document.getElementById("statPendingMessages").textContent =
+        messages.filter(item => item.status === "pending").length;
+
+      document.getElementById("statApprovedMessages").textContent =
+        messages.filter(item => item.status === "approved").length;
+
+      document.getElementById("statPendingStories").textContent =
+        stories.filter(item => item.status === "pending").length;
+
+      document.getElementById("statApprovedStories").textContent =
+        stories.filter(item => item.status === "approved").length;
+    }
+
+    function renderMessages() {
+      renderModerationList("pendingMessages", allMessages, "messages", "pending", false);
+      renderModerationList("approvedMessages", allMessages, "messages", "approved", false);
+    }
+
+    function renderStories() {
+      renderModerationList("pendingStories", allStories, "stories", "pending", true);
+      renderModerationList("approvedStories", allStories, "stories", "approved", true);
+    }
+
+    function renderModerationList(elementId, data, path, status, isStory) {
+      const box = document.getElementById(elementId);
+      box.innerHTML = "";
+
+      const items = Object.entries(data || {})
+        .filter(([id, item]) => item.status === status)
+        .sort((a, b) => (b[1].createdAt || b[1].approvedAt || 0) - (a[1].createdAt || a[1].approvedAt || 0));
+
+      if (items.length === 0) {
+        box.innerHTML = "<div class='small'>Здесь пока пусто.</div>";
+        return;
+      }
+
+      items.forEach(([id, item]) => {
+        const div = document.createElement("div");
+        div.className = "item";
+
+        const title = isStory
+          ? "📖 " + (item.title || "Без названия")
+          : "👤 " + (item.nickname || "Гость");
+
+        div.innerHTML = `
+          <div class="title">${escapeHTML(title)}</div>
+          ${isStory ? `<div class="meta">Автор: ${escapeHTML(item.nickname || "Гость")}</div>` : ""}
+          <div class="text">${escapeHTML(item.text || "")}</div>
+
+          <div class="meta">
+            Статус: ${escapeHTML(item.status || "unknown")}<br>
+            ID: ${escapeHTML(id)}<br>
+            UID: ${escapeHTML(item.userId || "unknown")}<br>
+            Создано: ${formatDate(item.createdAt)}<br>
+            Одобрено: ${formatDate(item.approvedAt)}
+          </div>
+
+          <div class="buttons">
+            ${item.status !== "approved" ? `
+              <button class="approve" onclick="approveItem('${path}', '${id}')">✅ Одобрить</button>
+            ` : `
+              <button class="warn" onclick="returnToPending('${path}', '${id}')">↩ Вернуть на модерацию</button>
+            `}
+
+            <button class="danger" onclick="deleteItem('${path}', '${id}')">❌ Удалить</button>
+          </div>
+        `;
+
+        box.appendChild(div);
+      });
+    }
+
+    function renderUsers() {
+      const search = document.getElementById("userSearchInput").value.trim().toLowerCase();
+      const box = document.getElementById("usersList");
+      box.innerHTML = "";
+
+      const users = Object.entries(allUsers || {})
+        .map(([id, user]) => ({ id, ...user }))
+        .filter(user => {
+          const text = [
+            user.id,
+            user.nickname,
+            user.displayName,
+            user.email
+          ].join(" ").toLowerCase();
+
+          return text.includes(search);
+        })
+        .sort((a, b) => (Number(b.hearts || 0) + Number(b.musicPlays || 0)) - (Number(a.hearts || 0) + Number(a.musicPlays || 0)));
+
+      if (users.length === 0) {
+        box.innerHTML = "<div class='small'>Пользователей не найдено.</div>";
+        return;
+      }
+
+      users.forEach(user => {
+        const div = document.createElement("div");
+        div.className = "item";
+
+        div.innerHTML = `
+          <div class="user-grid">
+            <div>
+              <div class="title">👤 ${escapeHTML(user.nickname || user.displayName || "Гость")}</div>
+              <div class="meta">
+                UID: ${escapeHTML(user.id)}<br>
+                Email: ${escapeHTML(user.email || "нет")}<br>
+                Display name: ${escapeHTML(user.displayName || "нет")}<br>
+                Last visit: ${formatDate(user.lastVisit)}
+              </div>
+            </div>
+
+            <div class="stat-box">
+              ❤️ Сердечки<br>
+              <span class="stat-number">${Number(user.hearts || 0)}</span>
+            </div>
+
+            <div class="stat-box">
+              🎵 Музыка<br>
+              <span class="stat-number">${Number(user.musicPlays || 0)}</span>
+            </div>
+          </div>
+
+          <div class="buttons">
+            <button class="warn" onclick="resetUserStats('${user.id}')">♻ Сбросить стату</button>
+            <button class="danger" onclick="deleteUserData('${user.id}')">❌ Удалить из базы</button>
+          </div>
+        `;
+
+        box.appendChild(div);
+      });
+    }
+
+    document.getElementById("userSearchInput").addEventListener("input", renderUsers);
+
+    function renderTop() {
+      renderTopList("topHearts", "hearts", "❤️");
+      renderTopList("topMusic", "musicPlays", "🎵");
+    }
+
+    function renderTopList(elementId, field, icon) {
+      const box = document.getElementById(elementId);
+      box.innerHTML = "";
+
+      const grouped = {};
+
+      Object.entries(allUsers || {}).forEach(([id, user]) => {
+        const nickname = user.nickname || user.displayName || ("Гость_" + id.slice(-4));
+        const value = Number(user[field] || 0);
+
+        if (!grouped[nickname]) {
+          grouped[nickname] = 0;
+        }
+
+        grouped[nickname] += value;
+      });
+
+      const sorted = Object.entries(grouped)
+        .map(([nickname, value]) => ({ nickname, value }))
+        .filter(user => user.value > 0)
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 50);
+
+      if (sorted.length === 0) {
+        box.innerHTML = "<div class='small'>Пока нет данных.</div>";
+        return;
+      }
+
+      sorted.forEach((user, index) => {
+        const div = document.createElement("div");
+        div.className = "top-item";
+        div.innerHTML = `
+          <span>#${index + 1} ${escapeHTML(user.nickname)}</span>
+          <span>${icon} ${user.value}</span>
+        `;
+        box.appendChild(div);
+      });
+    }
+
+    window.approveItem = async function(path, id) {
+      await update(ref(db, path + "/" + id), {
         status: "approved",
         approvedAt: Date.now()
       });
     };
 
-    window.deleteItem = async function(id) {
+    window.returnToPending = async function(path, id) {
+      await update(ref(db, path + "/" + id), {
+        status: "pending"
+      });
+    };
+
+    window.deleteItem = async function(path, id) {
       if (confirm("Удалить?")) {
-        await remove(ref(db, mode + "/" + id));
+        await remove(ref(db, path + "/" + id));
       }
     };
+
+    window.resetUserStats = async function(uid) {
+      if (confirm("Сбросить сердечки и музыку этому пользователю?")) {
+        await update(ref(db, "users/" + uid), {
+          hearts: 0,
+          musicPlays: 0
+        });
+      }
+    };
+
+    window.deleteUserData = async function(uid) {
+      if (confirm("Удалить данные пользователя из Realtime Database?")) {
+        await remove(ref(db, "users/" + uid));
+      }
+    };
+
+    function formatDate(value) {
+      if (!value) return "нет";
+
+      if (typeof value === "object") return "serverTimestamp";
+
+      const date = new Date(value);
+
+      if (isNaN(date.getTime())) return String(value);
+
+      return date.toLocaleString("ru-RU");
+    }
 
     function escapeHTML(text) {
       return String(text)
