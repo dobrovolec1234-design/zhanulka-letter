@@ -102,10 +102,7 @@
       z-index: 5;
     }
 
-    .content {
-      position: relative;
-      z-index: 1;
-    }
+    .content { position: relative; z-index: 1; }
 
     h1 {
       margin: 0 0 26px;
@@ -114,6 +111,35 @@
       font-weight: 400;
       text-align: center;
       color: #fff7ec;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .tab-btn {
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      color: #f4eee6;
+      cursor: pointer;
+      font-family: "Literata", serif;
+    }
+
+    .tab-btn.active {
+      background: rgba(255,255,255,0.16);
+    }
+
+    .tab {
+      display: none;
+    }
+
+    .tab.active {
+      display: block;
     }
 
     .slider {
@@ -174,13 +200,37 @@
       margin-top: 24px;
     }
 
-    .stat-box {
-      padding: 12px;
+    .stat-box, .panel, .message-item, .top-item {
+      padding: 14px;
       border-radius: 16px;
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.12);
-      text-align: center;
-      font-size: 14px;
+    }
+
+    .panel {
+      margin-top: 20px;
+    }
+
+    input, textarea {
+      width: 100%;
+      margin-top: 10px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.25);
+      color: #f4eee6;
+      font-family: "Literata", serif;
+      font-size: 15px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    button {
+      font-family: "Literata", serif;
     }
 
     .music-control {
@@ -200,7 +250,6 @@
       background: rgba(255,255,255,0.06);
       color: #f4eee6;
       font-size: 18px;
-      font-family: "Literata", serif;
       cursor: pointer;
       transition: 0.3s;
     }
@@ -218,54 +267,27 @@
       flex-shrink: 0;
     }
 
-    .user-panel,
-    .message-panel {
-      margin-top: 28px;
-      padding: 18px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.12);
-    }
-
-    .user-panel input,
-    .message-panel textarea {
-      width: 100%;
-      margin-top: 10px;
-      padding: 13px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(0,0,0,0.25);
-      color: #f4eee6;
-      font-family: "Literata", serif;
-      font-size: 15px;
-      outline: none;
-    }
-
-    .message-panel textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-
-    .message-list {
-      margin-top: 26px;
-    }
-
     .message-item {
       margin-top: 12px;
-      padding: 14px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
     }
 
     .message-name {
       font-weight: 600;
       margin-bottom: 6px;
+      color: #f1c9ff;
     }
 
     .message-text {
-      opacity: 0.86;
+      opacity: 0.9;
       line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .top-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
     }
 
     .heart {
@@ -316,7 +338,8 @@
         width: 100%;
       }
 
-      .stats-grid {
+      .stats-grid,
+      .tabs {
         grid-template-columns: 1fr;
       }
     }
@@ -326,7 +349,6 @@
 <body>
 
   <img src="Autograph.jpg" class="signature-bg">
-
   <div class="rain" id="rain"></div>
 
   <img src="cats.jpg" class="cat-left-top">
@@ -339,94 +361,127 @@
 
       <h1>Для Жанульки</h1>
 
-      <div class="slider">
-        <div class="slide-track">
-          <img src="photo1.jpg">
-          <img src="photo2.jpg">
-          <img src="photo3.jpg">
-          <img src="photo4.jpg">
-          <img src="photo5.jpg">
-          <img src="photo6.jpg">
-          <img src="photo7.jpg">
-          <img src="photo8.jpg">
-          <img src="photo9.jpg">
-          <img src="photo10.jpg">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="letter">📜 Письмо</button>
+        <button class="tab-btn" data-tab="wishes">💌 Пожелания</button>
+        <button class="tab-btn" data-tab="top">🏆 Топ</button>
+        <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+      </div>
 
-          <img src="photo1.jpg">
-          <img src="photo2.jpg">
-          <img src="photo3.jpg">
-          <img src="photo4.jpg">
-          <img src="photo5.jpg">
-          <img src="photo6.jpg">
-          <img src="photo7.jpg">
-          <img src="photo8.jpg">
-          <img src="photo9.jpg">
-          <img src="photo10.jpg">
+      <div class="tab active" id="letter">
+        <div class="slider">
+          <div class="slide-track">
+            <img src="photo1.jpg">
+            <img src="photo2.jpg">
+            <img src="photo3.jpg">
+            <img src="photo4.jpg">
+            <img src="photo5.jpg">
+            <img src="photo6.jpg">
+            <img src="photo7.jpg">
+            <img src="photo8.jpg">
+            <img src="photo9.jpg">
+            <img src="photo10.jpg">
+
+            <img src="photo1.jpg">
+            <img src="photo2.jpg">
+            <img src="photo3.jpg">
+            <img src="photo4.jpg">
+            <img src="photo5.jpg">
+            <img src="photo6.jpg">
+            <img src="photo7.jpg">
+            <img src="photo8.jpg">
+            <img src="photo9.jpg">
+            <img src="photo10.jpg">
+          </div>
+        </div>
+
+        <p>
+          Мой путь прослушивания твоей музыки начался с сериала
+          «Трудные подростки». В 3 сезоне 1 серии я услышал песню
+          «Синдром Бога», и с того самого момента твоя музыка начала
+          звучать у меня буквально 24/7.
+        </p>
+
+        <p>
+          Твои песни были рядом в моменты, когда внутри было слишком
+          много мыслей и слишком мало нужных слов.
+        </p>
+
+        <p>
+          А потом я услышал твои треки в «Зайчике» и снова почувствовал
+          тот самый первый вайб знакомства с твоим творчеством.
+        </p>
+
+        <p>
+          Спасибо тебе за искренность, атмосферу и эмоции, которые ты
+          вкладываешь в свои песни. Ты даже не представляешь, сколько
+          тепла и смысла твоя музыка может дать человеку.
+        </p>
+
+        <p>
+          Я очень благодарен, что однажды услышал твои песни.
+        </p>
+
+        <div class="quote">thank you for the music</div>
+
+        <div class="small">
+          скрытое письмо, открытое через QR-код
         </div>
       </div>
 
-      <p>
-        Мой путь прослушивания твоей музыки начался с сериала
-        «Трудные подростки». В 3 сезоне 1 серии я услышал песню
-        «Синдром Бога», и с того самого момента твоя музыка начала
-        звучать у меня буквально 24/7.
-      </p>
+      <div class="tab" id="wishes">
+        <div class="panel">
+          <div>👤 Твой ник:</div>
 
-      <p>
-        Твои песни были рядом в моменты, когда внутри было слишком
-        много мыслей и слишком мало нужных слов.
-      </p>
+          <input id="nicknameInput" maxlength="24" placeholder="Например: MoonCat">
 
-      <p>
-        А потом я услышал твои треки в «Зайчике» и снова почувствовал
-        тот самый первый вайб знакомства с твоим творчеством.
-      </p>
+          <button class="save-btn" id="saveNicknameBtn" style="margin-top:12px;">
+            сохранить ник
+          </button>
 
-      <p>
-        Спасибо тебе за искренность, атмосферу и эмоции, которые ты
-        вкладываешь в свои песни. Ты даже не представляешь, сколько
-        тепла и смысла твоя музыка может дать человеку.
-      </p>
+          <div class="small">
+            Ник можно менять. Сердечки и музыка не сбросятся, потому что они привязаны к твоему ID.
+          </div>
+        </div>
 
-      <p>
-        Я очень благодарен, что однажды услышал твои песни.
-      </p>
+        <div class="panel">
+          <div>💌 Написать пожелание Жанульке:</div>
 
-      <div class="quote">
-        thank you for the music
-      </div>
+          <textarea id="messageInput" maxlength="700" placeholder="Напиши свою историю или пожелание..."></textarea>
 
-      <div class="small">
-        скрытое письмо, открытое через QR-код
-      </div>
+          <button class="send-btn" id="sendMessageBtn" style="margin-top:12px;">
+            отправить на модерацию
+          </button>
 
-      <div class="stats-grid">
-        <div class="stat-box">❤️ Сердечек: <span id="heartCount">0</span></div>
-        <div class="stat-box">👀 Просмотров: <span id="viewCount">0</span></div>
-        <div class="stat-box">🎵 Музыку включали: <span id="musicCount">0</span></div>
-      </div>
+          <div class="small">
+            Сообщение появится на сайте только после одобрения.
+          </div>
+        </div>
 
-      <div class="user-panel">
-        <div>👤 Твой ник:</div>
-        <input id="nicknameInput" maxlength="24" placeholder="Например: MoonCat">
-        <button class="save-btn" id="saveNicknameBtn" style="margin-top:12px;">
-          сохранить ник
-        </button>
-        <div class="small">Твой ID создаётся случайно. Почта, имя и IP не сохраняются.</div>
-      </div>
-
-      <div class="message-panel">
-        <div>💌 Написать пожелание Жанульке:</div>
-        <textarea id="messageInput" maxlength="700" placeholder="Напиши свою историю или пожелание..."></textarea>
-        <button class="send-btn" id="sendMessageBtn" style="margin-top:12px;">
-          отправить на модерацию
-        </button>
-        <div class="small">Сообщение появится на сайте только после одобрения.</div>
-      </div>
-
-      <div class="message-list">
-        <div class="quote" style="font-size:28px;">пожелания</div>
+        <div class="quote" style="font-size:28px;">одобренные пожелания</div>
         <div id="approvedMessages"></div>
+      </div>
+
+      <div class="tab" id="top">
+        <div class="quote" style="font-size:28px;">🏆 топ по сердечкам</div>
+        <div id="topHearts"></div>
+
+        <div class="quote" style="font-size:28px;">🎵 топ по музыке</div>
+        <div id="topMusic"></div>
+      </div>
+
+      <div class="tab" id="stats">
+        <div class="stats-grid">
+          <div class="stat-box">❤️ Всего сердечек: <span id="heartCount">0</span></div>
+          <div class="stat-box">👀 Просмотров: <span id="viewCount">0</span></div>
+          <div class="stat-box">🎵 Запусков музыки: <span id="musicCount">0</span></div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">🖤 Твои сердечки: <span id="myHearts">0</span></div>
+          <div class="stat-box">🎧 Твои запуски: <span id="myMusic">0</span></div>
+          <div class="stat-box">🆔 ID: <span id="myId">...</span></div>
+        </div>
       </div>
 
       <div class="music-control">
@@ -461,7 +516,7 @@
         } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
         const firebaseConfig = {
-          apiKey: "AIzaSyAnBQnt8bK-3G0zjNyIQsLY5s--rjIV2Mk",
+          apiKey: "AIzaSyAnBQnt8bK-3G0zjNyIQsLY5s-_rjIV2Mk",
           authDomain: "a-letter-for-zhanulka.firebaseapp.com",
           databaseURL: "https://a-letter-for-zhanulka-default-rtdb.europe-west1.firebasedatabase.app",
           projectId: "a-letter-for-zhanulka",
@@ -486,6 +541,16 @@
           rain.appendChild(drop);
         }
 
+        document.querySelectorAll(".tab-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.tab).classList.add("active");
+          });
+        });
+
         let userId = localStorage.getItem("zhanulkaUserId");
 
         if (!userId) {
@@ -493,36 +558,56 @@
           localStorage.setItem("zhanulkaUserId", userId);
         }
 
+        document.getElementById("myId").textContent = userId.replace("user_", "");
+
+        const userRef = ref(db, "users/" + userId);
+
         const savedNickname = localStorage.getItem("zhanulkaNickname") || "";
         const nicknameInput = document.getElementById("nicknameInput");
         nicknameInput.value = savedNickname;
 
-        const userRef = ref(db, "users/" + userId);
-
         update(userRef, {
           lastVisit: serverTimestamp()
         });
+
+        if (savedNickname) {
+          update(userRef, {
+            nickname: savedNickname
+          });
+        }
 
         const visitedKey = "zhanulkaVisited";
 
         if (!sessionStorage.getItem(visitedKey)) {
           sessionStorage.setItem(visitedKey, "yes");
 
-          runTransaction(ref(db, "stats/views"), (current) => {
+          runTransaction(ref(db, "stats/views"), current => {
             return (current || 0) + 1;
           });
         }
 
-        onValue(ref(db, "stats/hearts"), (snapshot) => {
+        onValue(ref(db, "stats/hearts"), snapshot => {
           document.getElementById("heartCount").textContent = snapshot.val() || 0;
         });
 
-        onValue(ref(db, "stats/views"), (snapshot) => {
+        onValue(ref(db, "stats/views"), snapshot => {
           document.getElementById("viewCount").textContent = snapshot.val() || 0;
         });
 
-        onValue(ref(db, "stats/music"), (snapshot) => {
+        onValue(ref(db, "stats/music"), snapshot => {
           document.getElementById("musicCount").textContent = snapshot.val() || 0;
+        });
+
+        onValue(userRef, snapshot => {
+          const user = snapshot.val() || {};
+
+          document.getElementById("myHearts").textContent = user.hearts || 0;
+          document.getElementById("myMusic").textContent = user.musicPlays || 0;
+
+          if (user.nickname && !nicknameInput.value) {
+            nicknameInput.value = user.nickname;
+            localStorage.setItem("zhanulkaNickname", user.nickname);
+          }
         });
 
         document.getElementById("saveNicknameBtn").addEventListener("click", async () => {
@@ -547,6 +632,14 @@
           const text = document.getElementById("messageInput").value.trim();
           const nickname = nicknameInput.value.trim() || "Гость";
 
+          const lastMessageTime = Number(localStorage.getItem("lastMessageTime") || 0);
+          const now = Date.now();
+
+          if (now - lastMessageTime < 60000) {
+            alert("Можно отправлять только 1 сообщение в минуту");
+            return;
+          }
+
           if (text.length < 5) {
             alert("Сообщение слишком короткое");
             return;
@@ -562,11 +655,13 @@
             createdAt: serverTimestamp()
           });
 
+          localStorage.setItem("lastMessageTime", String(now));
           document.getElementById("messageInput").value = "";
+
           alert("Отправлено на модерацию");
         });
 
-        onValue(ref(db, "messages"), (snapshot) => {
+        onValue(ref(db, "messages"), snapshot => {
           const box = document.getElementById("approvedMessages");
           box.innerHTML = "";
 
@@ -579,7 +674,7 @@
 
           const approved = Object.values(messages)
             .filter(msg => msg.status === "approved")
-            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            .sort((a, b) => (b.approvedAt || b.createdAt || 0) - (a.approvedAt || a.createdAt || 0));
 
           if (approved.length === 0) {
             box.innerHTML = `<div class="small">Пока нет одобренных пожеланий.</div>`;
@@ -599,13 +694,48 @@
           });
         });
 
-        function escapeHTML(text) {
-          return String(text)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
+        onValue(ref(db, "users"), snapshot => {
+          const users = snapshot.val();
+
+          renderTop(users, "hearts", "topHearts", "❤️");
+          renderTop(users, "musicPlays", "topMusic", "🎵");
+        });
+
+        function renderTop(users, field, elementId, icon) {
+          const box = document.getElementById(elementId);
+          box.innerHTML = "";
+
+          if (!users) {
+            box.innerHTML = `<div class="small">Пока нет данных.</div>`;
+            return;
+          }
+
+          const sorted = Object.entries(users)
+            .map(([id, user]) => ({
+              id,
+              nickname: user.nickname || "Гость_" + id.slice(-4),
+              value: user[field] || 0
+            }))
+            .filter(user => user.value > 0)
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 10);
+
+          if (sorted.length === 0) {
+            box.innerHTML = `<div class="small">Пока нет данных.</div>`;
+            return;
+          }
+
+          sorted.forEach((user, index) => {
+            const item = document.createElement("div");
+            item.className = "top-item";
+
+            item.innerHTML = `
+              <span>${index + 1}. ${escapeHTML(user.nickname)}</span>
+              <span>${icon} ${user.value}</span>
+            `;
+
+            box.appendChild(item);
+          });
         }
 
         const tracks = [
@@ -616,16 +746,23 @@
 
         let currentTrack = 0;
         const audio = document.getElementById("song");
-        let musicCounted = false;
+        let lastMusicCount = Number(localStorage.getItem("lastMusicCount") || 0);
 
         window.playMusic = function() {
           audio.src = tracks[currentTrack];
           audio.play();
 
-          if (!musicCounted) {
-            musicCounted = true;
+          const now = Date.now();
 
-            runTransaction(ref(db, "stats/music"), (current) => {
+          if (now - lastMusicCount > 30000) {
+            lastMusicCount = now;
+            localStorage.setItem("lastMusicCount", String(now));
+
+            runTransaction(ref(db, "stats/music"), current => {
+              return (current || 0) + 1;
+            });
+
+            runTransaction(ref(db, "users/" + userId + "/musicPlays"), current => {
               return (current || 0) + 1;
             });
           }
@@ -649,16 +786,9 @@
         });
 
         const hearts = ["🖤", "❤️", "💜", "💔", "✨", "♡"];
+        let lastHeartClick = 0;
 
         document.addEventListener("click", function(e) {
-          runTransaction(ref(db, "stats/hearts"), (current) => {
-            return (current || 0) + 1;
-          });
-
-          runTransaction(ref(db, "users/" + userId + "/hearts"), (current) => {
-            return (current || 0) + 1;
-          });
-
           const heart = document.createElement("div");
 
           heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
@@ -672,7 +802,32 @@
           setTimeout(() => {
             heart.remove();
           }, 2000);
+
+          const now = Date.now();
+
+          if (now - lastHeartClick < 2000) {
+            return;
+          }
+
+          lastHeartClick = now;
+
+          runTransaction(ref(db, "stats/hearts"), current => {
+            return (current || 0) + 1;
+          });
+
+          runTransaction(ref(db, "users/" + userId + "/hearts"), current => {
+            return (current || 0) + 1;
+          });
         });
+
+        function escapeHTML(text) {
+          return String(text)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+        }
       </script>
 
     </section>
