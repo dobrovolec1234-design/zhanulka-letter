@@ -242,6 +242,21 @@
       background: rgba(255,255,255,0.12);
     }
 
+    .auth-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .auth-status {
+      text-align: center;
+      margin-top: 12px;
+      opacity: 0.75;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
     .music-player {
       margin-top: 30px;
       padding: 18px;
@@ -367,7 +382,8 @@
       .cat-right-bottom { right: -55px; bottom: 25px; }
 
       .stats-grid,
-      .tabs {
+      .tabs,
+      .auth-row {
         grid-template-columns: 1fr;
       }
 
@@ -398,6 +414,14 @@
         <button class="tab-btn" data-tab="wishes">💌 Пожелания</button>
         <button class="tab-btn" data-tab="top">🏆 Топ</button>
         <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+      </div>
+
+      <div class="panel">
+        <div class="auth-row">
+          <button class="save-btn" id="loginBtn">🔑 Войти через Google</button>
+          <button class="save-btn" id="logoutBtn">🚪 Выйти</button>
+        </div>
+        <div class="auth-status" id="authStatus">Статус: не вошёл</div>
       </div>
 
       <div class="tab active" id="letter">
@@ -452,7 +476,7 @@
             сохранить ник
           </button>
           <div class="small">
-            Ник можно менять. Сердечки и музыка не сбросятся, потому что они привязаны к твоему ID.
+            Ник можно менять. Сердечки и музыка не сбросятся, потому что они привязаны к твоему аккаунту Google.
           </div>
         </div>
 
@@ -489,7 +513,7 @@
         <div class="stats-grid">
           <div class="stat-box">🖤 Твои сердечки: <span id="myHearts">0</span></div>
           <div class="stat-box">🎧 Твои запуски: <span id="myMusic">0</span></div>
-          <div class="stat-box">🆔 ID: <span id="myId">...</span></div>
+          <div class="stat-box">🆔 ID: <span id="myId">не вошёл</span></div>
         </div>
       </div>
 
@@ -545,6 +569,14 @@
           update
         } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
+        import {
+          getAuth,
+          GoogleAuthProvider,
+          signInWithPopup,
+          onAuthStateChanged,
+          signOut
+        } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
         const firebaseConfig = {
           apiKey: "AIzaSyAnBQnt8bK-3G0zjNyIQsLY5s-_rjIV2Mk",
           authDomain: "a-letter-for-zhanulka.firebaseapp.com",
@@ -557,6 +589,36 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        let userId = null;
+        let userRef = null;
+
+        const authStatus = document.getElementById("authStatus");
+        const loginBtn = document.getElementById("loginBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+
+        loginBtn.addEventListener("click", async () => {
+          try {
+            await signInWithPopup(auth, provider);
+          } catch (error) {
+            alert("Ошибка входа: " + error.message);
+          }
+        });
+
+        logoutBtn.addEventListener("click", async () => {
+          await signOut(auth);
+        });
+
+        function requireLogin() {
+          if (!userId || !userRef) {
+            alert("Сначала войди через Google");
+            return false;
+          }
+
+          return true;
+        }
 
         const rain = document.getElementById("rain");
 
@@ -581,30 +643,58 @@
           });
         });
 
-        let userId = localStorage.getItem("zhanulkaUserId");
-
-        if (!userId) {
-          userId = "user_" + Math.random().toString(36).slice(2, 10);
-          localStorage.setItem("zhanulkaUserId", userId);
-        }
-
-        document.getElementById("myId").textContent = userId.replace("user_", "");
-
-        const userRef = ref(db, "users/" + userId);
-
         const savedNickname = localStorage.getItem("zhanulkaNickname") || "";
         const nicknameInput = document.getElementById("nicknameInput");
         nicknameInput.value = savedNickname;
 
-        update(userRef, {
-          lastVisit: serverTimestamp()
-        });
+        onAuthStateChanged(auth, async (user) => {
+          if (!user) {
+            userId = null;
+            userRef = null;
 
-        if (savedNickname) {
-          update(userRef, {
-            nickname: savedNickname
+            authStatus.textContent = "Статус: не вошёл";
+            document.getElementById("myId").textContent = "не вошёл";
+            document.getElementById("myHearts").textContent = "0";
+            document.getElementById("myMusic").textContent = "0";
+
+            return;
+          }
+
+          userId = user.uid;
+          userRef = ref(db, "users/" + userId);
+
+          authStatus.textContent = "Статус: вошёл как " + (user.email || user.uid);
+          document.getElementById("myId").textContent = user.email || user.uid;
+
+          const updates = {
+            email: user.email || "",
+            displayName: user.displayName || "",
+            photoURL: user.photoURL || "",
+            lastVisit: serverTimestamp()
+          };
+
+          if (savedNickname) {
+            updates.nickname = savedNickname;
+          } else if (user.displayName) {
+            updates.nickname = user.displayName;
+            nicknameInput.value = user.displayName;
+            localStorage.setItem("zhanulkaNickname", user.displayName);
+          }
+
+          await update(userRef, updates);
+
+          onValue(userRef, snapshot => {
+            const dbUser = snapshot.val() || {};
+
+            document.getElementById("myHearts").textContent = dbUser.hearts || 0;
+            document.getElementById("myMusic").textContent = dbUser.musicPlays || 0;
+
+            if (dbUser.nickname && !nicknameInput.value) {
+              nicknameInput.value = dbUser.nickname;
+              localStorage.setItem("zhanulkaNickname", dbUser.nickname);
+            }
           });
-        }
+        });
 
         const visitedKey = "zhanulkaVisited";
 
@@ -641,6 +731,8 @@
         });
 
         document.getElementById("saveNicknameBtn").addEventListener("click", async () => {
+          if (!requireLogin()) return;
+
           const nickname = nicknameInput.value.trim().slice(0, 24);
 
           if (!nickname) {
@@ -659,6 +751,8 @@
         });
 
         document.getElementById("sendMessageBtn").addEventListener("click", async () => {
+          if (!requireLogin()) return;
+
           const text = document.getElementById("messageInput").value.trim();
           const nickname = nicknameInput.value.trim() || "Гость";
 
@@ -727,7 +821,6 @@
         onValue(ref(db, "users"), snapshot => {
           const users = snapshot.val();
 
-          console.log("USERS DATA:", users);
 
           const topHeartsBox = document.getElementById("topHearts");
           const topMusicBox = document.getElementById("topMusic");
@@ -757,8 +850,9 @@
               value: Number(user[field] || 0)
             }))
             .filter(user => user.value > 0)
+            .filter(user => user.value > 0)
             .sort((a, b) => b.value - a.value)
-            .slice(0, 10);
+            .slice(0, 25);
 
           if (sorted.length === 0) {
             box.innerHTML = "<div class='small'>Пока нет данных</div>";
@@ -807,6 +901,8 @@
         }
 
         function countMusicPlay() {
+          if (!requireLogin()) return;
+
           const now = Date.now();
 
           if (now - lastMusicCount > 30000) {
@@ -936,6 +1032,8 @@
           setTimeout(() => {
             heart.remove();
           }, 2000);
+
+          if (!userId) return;
 
           const now = Date.now();
 
