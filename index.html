@@ -370,6 +370,40 @@
       white-space: pre-wrap;
     }
 
+    .story-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.055);
+      border: 1px solid rgba(255,255,255,0.12);
+      margin-top: 18px;
+    }
+
+    .story-title {
+      font-family: "UnifrakturMaguntia", serif;
+      font-size: clamp(26px, 5vw, 40px);
+      text-align: center;
+      margin-bottom: 18px;
+      color: #fff7ec;
+    }
+
+    .story-text {
+      white-space: pre-wrap;
+    }
+
+    .story-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .story-counter {
+      text-align: center;
+      margin-top: 12px;
+      opacity: 0.65;
+      font-size: 14px;
+    }
+
     .top-item {
       display: flex;
       justify-content: space-between;
@@ -425,6 +459,10 @@
 
       .player-buttons {
         grid-template-columns: 56px 1fr 56px;
+      }
+
+      .story-nav {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -484,32 +522,17 @@
           </div>
         </div>
 
-        <p>
-          Мой путь прослушивания твоей музыки начался с сериала
-          «Трудные подростки». В 3 сезоне 1 серии я услышал песню
-          «Синдром Бога», и с того самого момента твоя музыка начала
-          звучать у меня буквально 24/7.
-        </p>
+        <div class="story-card">
+          <div class="story-title" id="storyTitle">История</div>
+          <div class="story-text" id="storyText"></div>
 
-        <p>
-          Твои песни были рядом в моменты, когда внутри было слишком
-          много мыслей и слишком мало нужных слов.
-        </p>
+          <div class="story-nav">
+            <button class="save-btn" id="prevStoryBtn">← предыдущая история</button>
+            <button class="save-btn" id="nextStoryBtn">следующая история →</button>
+          </div>
 
-        <p>
-          А потом я услышал твои треки в «Зайчике» и снова почувствовал
-          тот самый первый вайб знакомства с твоим творчеством.
-        </p>
-
-        <p>
-          Спасибо тебе за искренность, атмосферу и эмоции, которые ты
-          вкладываешь в свои песни. Ты даже не представляешь, сколько
-          тепла и смысла твоя музыка может дать человеку.
-        </p>
-
-        <p>
-          Я очень благодарен, что однажды услышал твои песни.
-        </p>
+          <div class="story-counter" id="storyCounter">История 1 / 1</div>
+        </div>
 
         <div class="quote">thank you for the music</div>
 
@@ -759,6 +782,81 @@
           });
         });
 
+        const fallbackStories = [
+          {
+            title: "Мой путь к твоей музыке",
+            text: `Мой путь прослушивания твоей музыки начался с сериала
+«Трудные подростки». В 3 сезоне 1 серии я услышал песню
+«Синдром Бога», и с того самого момента твоя музыка начала
+звучать у меня буквально 24/7.
+
+Твои песни были рядом в моменты, когда внутри было слишком
+много мыслей и слишком мало нужных слов.
+
+А потом я услышал твои треки в «Зайчике» и снова почувствовал
+тот самый первый вайб знакомства с твоим творчеством.
+
+Спасибо тебе за искренность, атмосферу и эмоции, которые ты
+вкладываешь в свои песни. Ты даже не представляешь, сколько
+тепла и смысла твоя музыка может дать человеку.
+
+Я очень благодарен, что однажды услышал твои песни.`
+          }
+        ];
+
+        let stories = fallbackStories;
+        let currentStory = 0;
+
+        function renderStory() {
+          const story = stories[currentStory] || fallbackStories[0];
+
+          document.getElementById("storyTitle").textContent = story.title || "История";
+          document.getElementById("storyText").textContent = story.text || "";
+          document.getElementById("storyCounter").textContent =
+            "История " + (currentStory + 1) + " / " + stories.length;
+        }
+
+        document.getElementById("prevStoryBtn").addEventListener("click", () => {
+          currentStory--;
+
+          if (currentStory < 0) {
+            currentStory = stories.length - 1;
+          }
+
+          renderStory();
+        });
+
+        document.getElementById("nextStoryBtn").addEventListener("click", () => {
+          currentStory++;
+
+          if (currentStory >= stories.length) {
+            currentStory = 0;
+          }
+
+          renderStory();
+        });
+
+        onValue(ref(db, "stories"), snapshot => {
+          const data = snapshot.val();
+
+          if (!data) {
+            stories = fallbackStories;
+            currentStory = 0;
+            renderStory();
+            return;
+          }
+
+          const approvedStories = Object.values(data)
+            .filter(story => story.status === "approved")
+            .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+          stories = approvedStories.length > 0 ? approvedStories : fallbackStories;
+          currentStory = 0;
+          renderStory();
+        });
+
+        renderStory();
+
         const visitedKey = "zhanulkaVisited";
 
         if (!sessionStorage.getItem(visitedKey)) {
@@ -956,11 +1054,7 @@
         let lastMusicCount = Number(localStorage.getItem("lastMusicCount") || 0);
 
         function loadTrack() {
-          audio.pause();
-
           audio.src = tracks[currentTrack];
-          audio.load();
-
           trackTitle.textContent = tracks[currentTrack];
           progressControl.value = 0;
           currentTimeText.textContent = "0:00";
@@ -987,14 +1081,10 @@
         }
 
         function playMusic() {
-          audio.play().then(() => {
-            isPlaying = true;
-            playPauseBtn.textContent = "⏸ выключить";
-            countMusicPlay();
-          }).catch(error => {
-            console.log("Ошибка запуска трека:", error);
-            alert("Не получилось запустить трек: " + tracks[currentTrack]);
-          });
+          audio.play();
+          isPlaying = true;
+          playPauseBtn.textContent = "⏸ выключить";
+          countMusicPlay();
         }
 
         function pauseMusic() {
@@ -1015,11 +1105,7 @@
 
           loadTrack();
 
-          if (isPlaying) {
-            audio.play().catch(error => {
-              console.log("Ошибка запуска трека:", error);
-            });
-          }
+          if (isPlaying) audio.play();
         });
 
         nextTrackBtn.addEventListener("click", () => {
@@ -1030,9 +1116,7 @@
           loadTrack();
 
           if (isPlaying) {
-            audio.play().catch(error => {
-              console.log("Ошибка запуска трека:", error);
-            });
+            audio.play();
             countMusicPlay();
           }
         });
@@ -1060,19 +1144,11 @@
 
           loadTrack();
 
-          if (isPlaying) {
-            audio.play().catch(error => {
-              console.log("Ошибка запуска трека:", error);
-            });
-          }
+          if (isPlaying) audio.play();
         });
 
         volumeControl.addEventListener("input", function() {
           audio.volume = this.value;
-        });
-
-        audio.addEventListener("error", () => {
-          console.log("Ошибка загрузки аудио:", tracks[currentTrack], audio.error);
         });
 
         loadTrack();
