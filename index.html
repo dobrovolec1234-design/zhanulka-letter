@@ -897,11 +897,21 @@
           const box = document.getElementById(elementId);
           box.innerHTML = "";
 
-          const sorted = Object.entries(users)
-            .map(([id, user]) => ({
-              nickname: user.nickname || user.displayName || ("Гость_" + id.slice(-4)),
-              value: Number(user[field] || 0)
-            }))
+          const grouped = {};
+
+          Object.entries(users || {}).forEach(([id, user]) => {
+            const nickname = user.nickname || user.displayName || ("Гость_" + id.slice(-4));
+            const value = Number(user[field] || 0);
+
+            if (!grouped[nickname]) {
+              grouped[nickname] = 0;
+            }
+
+            grouped[nickname] += value;
+          });
+
+          const sorted = Object.entries(grouped)
+            .map(([nickname, value]) => ({ nickname, value }))
             .filter(user => user.value > 0)
             .sort((a, b) => b.value - a.value)
             .slice(0, 25);
