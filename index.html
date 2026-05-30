@@ -114,7 +114,7 @@
 
     .tabs {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 10px;
       margin-bottom: 28px;
     }
@@ -536,6 +536,7 @@
         <button class="tab-btn" data-tab="wishes">💌 Пожелания</button>
         <button class="tab-btn" data-tab="top">🏆 Топ</button>
         <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+        <button class="tab-btn" data-tab="about">👤 О себе</button>
         <button class="tab-btn" data-tab="stories">📖 Истории</button>
       </div>
 
@@ -632,7 +633,29 @@
         <div class="stats-grid">
           <div class="stat-box">🖤 Твои сердечки: <span id="myHearts">0</span></div>
           <div class="stat-box">🎧 Твои запуски: <span id="myMusic">0</span></div>
-          <div class="stat-box">🆔 ID: <span id="myId">не вошёл</span></div>
+          <div class="stat-box">👤 Аккаунт: <span id="myPublicStatus">не вошёл</span></div>
+        </div>
+      </div>
+
+      <div class="tab" id="about">
+        <div class="panel">
+          <div class="story-form-title">👤 О себе</div>
+
+          <div class="small">
+            Здесь можно изменить ник. Твой внутренний ID скрыт от обычных посетителей и виден только в админке.
+          </div>
+
+          <input id="aboutNicknameInput" maxlength="24" placeholder="Твой ник">
+
+          <button class="save-btn" id="saveAboutNicknameBtn" style="margin-top:12px;">
+            сохранить ник
+          </button>
+
+          <div class="stats-grid">
+            <div class="stat-box">📧 Почта: <span id="aboutEmail">не вошёл</span></div>
+            <div class="stat-box">🖤 Твои сердечки: <span id="aboutHearts">0</span></div>
+            <div class="stat-box">🎧 Твои запуски: <span id="aboutMusic">0</span></div>
+          </div>
         </div>
       </div>
 
@@ -735,6 +758,7 @@
 
         const authStatus = document.getElementById("authStatus");
         const nicknameInput = document.getElementById("nicknameInput");
+        const aboutNicknameInput = document.getElementById("aboutNicknameInput");
 
         document.getElementById("googleLoginBtn").addEventListener("click", async () => {
           try {
@@ -794,7 +818,8 @@
             userId = null;
             userRef = null;
             authStatus.textContent = "Статус: не вошёл";
-            document.getElementById("myId").textContent = "не вошёл";
+            document.getElementById("myPublicStatus").textContent = "не вошёл";
+            document.getElementById("aboutEmail").textContent = "не вошёл";
             document.getElementById("myHearts").textContent = "0";
             document.getElementById("myMusic").textContent = "0";
             return;
@@ -804,13 +829,18 @@
           userRef = ref(db, "users/" + userId);
 
           authStatus.textContent = "Статус: вошёл как " + (user.email || user.uid);
-          document.getElementById("myId").textContent = user.email || user.uid;
+          document.getElementById("myPublicStatus").textContent = "вошёл";
+          document.getElementById("aboutEmail").textContent = user.email || "Google-аккаунт";
 
           const savedNickname = localStorage.getItem("zhanulkaNickname") || "";
           const defaultNick = user.displayName || (user.email ? user.email.split("@")[0] : "Гость");
 
           if (!nicknameInput.value) {
             nicknameInput.value = savedNickname || defaultNick;
+          }
+
+          if (!aboutNicknameInput.value) {
+            aboutNicknameInput.value = nicknameInput.value;
           }
 
           await update(userRef, {
@@ -826,9 +856,12 @@
 
             document.getElementById("myHearts").textContent = dbUser.hearts || 0;
             document.getElementById("myMusic").textContent = dbUser.musicPlays || 0;
+            document.getElementById("aboutHearts").textContent = dbUser.hearts || 0;
+            document.getElementById("aboutMusic").textContent = dbUser.musicPlays || 0;
 
             if (dbUser.nickname && !nicknameInput.value) {
               nicknameInput.value = dbUser.nickname;
+              aboutNicknameInput.value = dbUser.nickname;
               localStorage.setItem("zhanulkaNickname", dbUser.nickname);
             }
           });
@@ -889,6 +922,28 @@
           }
 
           localStorage.setItem("zhanulkaNickname", nickname);
+          aboutNicknameInput.value = nickname;
+
+          await update(userRef, {
+            nickname: nickname,
+            updatedAt: serverTimestamp()
+          });
+
+          alert("Ник сохранён");
+        });
+
+        document.getElementById("saveAboutNicknameBtn").addEventListener("click", async () => {
+          if (!requireLogin()) return;
+
+          const nickname = aboutNicknameInput.value.trim().slice(0, 24);
+
+          if (!nickname) {
+            alert("Напиши ник");
+            return;
+          }
+
+          localStorage.setItem("zhanulkaNickname", nickname);
+          nicknameInput.value = nickname;
 
           await update(userRef, {
             nickname: nickname,
@@ -902,7 +957,7 @@
           if (!requireLogin()) return;
 
           const text = document.getElementById("messageInput").value.trim();
-          const nickname = nicknameInput.value.trim() || "Гость";
+          const nickname = nicknameInput.value.trim() || aboutNicknameInput.value.trim() || "Гость";
           const lastMessageTime = Number(localStorage.getItem("lastMessageTime") || 0);
           const now = Date.now();
 
@@ -936,7 +991,7 @@
 
           const title = document.getElementById("storyTitleInput").value.trim();
           const text = document.getElementById("storyTextInput").value.trim();
-          const nickname = nicknameInput.value.trim() || "Гость";
+          const nickname = nicknameInput.value.trim() || aboutNicknameInput.value.trim() || "Гость";
 
           const lastStoryTime = Number(localStorage.getItem("lastStoryTime") || 0);
           const now = Date.now();
