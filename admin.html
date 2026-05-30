@@ -203,6 +203,29 @@
       border: 1px solid rgba(255,255,255,0.12);
     }
 
+    .scroll-box {
+      max-height: 620px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .scroll-box::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .scroll-box::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.22);
+      border-radius: 999px;
+    }
+
+    .merge-box {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.055);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
     .user-grid {
       display: grid;
       grid-template-columns: 1.4fr 1fr 1fr;
@@ -317,17 +340,30 @@
     <section class="panel" id="usersPanel">
       <h2>👥 Пользователи</h2>
       <input id="userSearchInput" placeholder="Поиск по нику, email или UID">
-      <div id="usersList"></div>
+
+      <div class="merge-box">
+        <h3>🔗 Объединить статистику пользователей</h3>
+        <div class="small">
+          Вставь UID старого пользователя и UID нового пользователя. Сердечки и музыка сложатся в новом UID, а старый UID удалится из базы.
+        </div>
+
+        <input id="mergeFromUid" placeholder="Старый UID, откуда забрать статистику">
+        <input id="mergeToUid" placeholder="Новый UID, куда добавить статистику">
+
+        <button class="warn" id="mergeStatsBtn">🔗 Объединить статистику</button>
+      </div>
+
+      <div id="usersList" class="scroll-box"></div>
     </section>
 
     <section class="panel" id="topPanel">
       <h2>🏆 Топы</h2>
 
-      <h3>❤️ Топ по сердечкам</h3>
-      <div id="topHearts"></div>
+      <h3>❤️ Топ по сердечкам до 100 мест</h3>
+      <div id="topHearts" class="scroll-box"></div>
 
-      <h3 style="margin-top:28px;">🎵 Топ по музыке</h3>
-      <div id="topMusic"></div>
+      <h3 style="margin-top:28px;">🎵 Топ по музыке до 100 мест</h3>
+      <div id="topMusic" class="scroll-box"></div>
     </section>
   </div>
 
@@ -623,6 +659,11 @@
           </div>
 
           <div class="buttons">
+            <button class="warn" onclick="setMergeFrom('${user.id}')">⬅ Откуда</button>
+            <button class="warn" onclick="setMergeTo('${user.id}')">➡ Куда</button>
+          </div>
+
+          <div class="buttons">
             <button class="warn" onclick="resetUserStats('${user.id}')">♻ Сбросить стату</button>
             <button class="danger" onclick="deleteUserData('${user.id}')">❌ Удалить из базы</button>
           </div>
@@ -660,7 +701,7 @@
         .map(([nickname, value]) => ({ nickname, value }))
         .filter(user => user.value > 0)
         .sort((a, b) => b.value - a.value)
-        .slice(0, 50);
+        .slice(0, 100);
 
       if (sorted.length === 0) {
         box.innerHTML = "<div class='small'>Пока нет данных.</div>";
@@ -696,6 +737,73 @@
         await remove(ref(db, path + "/" + id));
       }
     };
+
+    window.setMergeFrom = function(uid) {
+      document.getElementById("mergeFromUid").value = uid;
+    };
+
+    window.setMergeTo = function(uid) {
+      document.getElementById("mergeToUid").value = uid;
+    };
+
+    document.getElementById("mergeStatsBtn").addEventListener("click", async () => {
+      const fromUid = document.getElementById("mergeFromUid").value.trim();
+      const toUid = document.getElementById("mergeToUid").value.trim();
+
+      if (!fromUid || !toUid) {
+        alert("Вставь оба UID");
+        return;
+      }
+
+      if (fromUid === toUid) {
+        alert("UID не должны быть одинаковыми");
+        return;
+      }
+
+      const fromUser = allUsers[fromUid];
+      const toUser = allUsers[toUid];
+
+      if (!fromUser) {
+        alert("Старый UID не найден");
+        return;
+      }
+
+      if (!toUser) {
+        alert("Новый UID не найден");
+        return;
+      }
+
+      const fromHearts = Number(fromUser.hearts || 0);
+      const fromMusic = Number(fromUser.musicPlays || 0);
+      const toHearts = Number(toUser.hearts || 0);
+      const toMusic = Number(toUser.musicPlays || 0);
+
+      const ok = confirm(
+        "Объединить статистику?\\n\\n" +
+        "Откуда: " + fromUid + "\\n" +
+        "Куда: " + toUid + "\\n\\n" +
+        "Сердечки: " + toHearts + " + " + fromHearts + "\\n" +
+        "Музыка: " + toMusic + " + " + fromMusic + "\\n\\n" +
+        "Старый UID будет удалён из users."
+      );
+
+      if (!ok) return;
+
+      await update(ref(db, "users/" + toUid), {
+        hearts: toHearts + fromHearts,
+        musicPlays: toMusic + fromMusic,
+        nickname: toUser.nickname || fromUser.nickname || toUser.displayName || fromUser.displayName || "Гость",
+        mergedFrom: fromUid,
+        mergedAt: Date.now()
+      });
+
+      await remove(ref(db, "users/" + fromUid));
+
+      document.getElementById("mergeFromUid").value = "";
+      document.getElementById("mergeToUid").value = "";
+
+      alert("Статистика объединена");
+    });
 
     window.resetUserStats = async function(uid) {
       if (confirm("Сбросить сердечки и музыку этому пользователю?")) {
