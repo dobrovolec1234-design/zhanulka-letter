@@ -114,7 +114,7 @@
 
     .tabs {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 10px;
       margin-bottom: 28px;
     }
@@ -535,7 +535,6 @@
         <button class="tab-btn active" data-tab="letter">📜 Письмо</button>
         <button class="tab-btn" data-tab="wishes">💌 Пожелания</button>
         <button class="tab-btn" data-tab="top">🏆 Топ</button>
-        <button class="tab-btn" data-tab="stats">📊 Статистика</button>
         <button class="tab-btn" data-tab="about">👤 О себе</button>
         <button class="tab-btn" data-tab="stories">📖 Истории</button>
       </div>
@@ -618,17 +617,6 @@
       <div class="tab" id="top">
         <div class="quote" style="font-size:28px;">🏆 топ по сердечкам до 100 мест</div>
         <div id="topHearts"></div>
-      </div>
-
-      <div class="tab" id="stats">
-        <div class="stats-grid">
-          <div class="stat-box">❤️ Всего сердечек: <span id="heartCount">0</span></div>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat-box">🖤 Твои сердечки: <span id="myHearts">0</span></div>
-          <div class="stat-box">👤 Аккаунт: <span id="myPublicStatus">не вошёл</span></div>
-        </div>
       </div>
 
       <div class="tab" id="about">
@@ -805,9 +793,7 @@
             userId = null;
             userRef = null;
             authStatus.textContent = "Статус: не вошёл";
-            document.getElementById("myPublicStatus").textContent = "не вошёл";
             document.getElementById("aboutEmail").textContent = "не вошёл";
-            document.getElementById("myHearts").textContent = "0";
             return;
           }
 
@@ -815,7 +801,6 @@
           userRef = ref(db, "users/" + userId);
 
           authStatus.textContent = "Статус: вошёл как " + (user.email || user.uid);
-          document.getElementById("myPublicStatus").textContent = "вошёл";
           document.getElementById("aboutEmail").textContent = user.email || "Google-аккаунт";
 
           const savedNickname = localStorage.getItem("zhanulkaNickname") || "";
@@ -840,7 +825,6 @@
           onValue(userRef, snapshot => {
             const dbUser = snapshot.val() || {};
 
-            document.getElementById("myHearts").textContent = dbUser.hearts || 0;
             document.getElementById("aboutHearts").textContent = dbUser.hearts || 0;
 
             if (dbUser.nickname && !nicknameInput.value) {
@@ -882,10 +866,6 @@
             return (current || 0) + 1;
           });
         }
-
-        onValue(ref(db, "stats/hearts"), snapshot => {
-          document.getElementById("heartCount").textContent = snapshot.val() || 0;
-        });
 
         document.getElementById("saveNicknameBtn").addEventListener("click", async () => {
           if (!requireLogin()) return;
